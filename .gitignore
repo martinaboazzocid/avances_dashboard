@@ -1,0 +1,21 @@
+# Credenciales — NUNCA commitear
+.env
+*.env
+secrets.py
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editores
+.vscode/
+.idea/
+*.swp
