@@ -354,6 +354,25 @@ def filter_and_classify(subtasks, orders):
             n = len(classified[pais][tab])
             print(f"  {pais}/{tab}: {n} registros")
 
+    # DIAGNÓSTICO: mostrar valores únicos del campo de país y stages
+    from collections import Counter
+    vals_pais = Counter()
+    vals_stage = Counter()
+    for pais in classified:
+        for tab in classified[pais]:
+            for t in classified[pais][tab]:
+                v = t.get("x_studio_related_field_8rl_1jhbqu80b") or ""
+                vals_pais[str(v)] += 1
+                stage = t.get("stage_id")
+                if isinstance(stage, (list, tuple)) and len(stage) > 1:
+                    vals_stage[stage[1]] += 1
+    print("DIAG valores campo pais (x_studio_related_field_8rl):")
+    for v, n in vals_pais.most_common():
+        print(f"  {n:5d}x  {v!r}")
+    print("DIAG stages:")
+    for v, n in vals_stage.most_common():
+        print(f"  {n:5d}x  {v!r}")
+
     return classified
 
 
