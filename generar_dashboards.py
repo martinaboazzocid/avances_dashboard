@@ -14,7 +14,7 @@ CONFIGURACIÓN:
     Variables de entorno (o archivo .env local):
         ODOO_URL       = https://zas-talent.odoo.com
         ODOO_DB        = zas-talent
-        ODOO_USER      = martu@zastalents.com
+        ODOO_USER      = martina.boazzo@zastalents.com
         ODOO_PASSWORD  = tu_password
 
 REQUISITOS:
