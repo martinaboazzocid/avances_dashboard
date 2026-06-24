@@ -43,12 +43,16 @@ LINE_FIELDS = [
 # ─── CLASIFICACIÓN ─────────────────────────────────────────────────────────────
 # x_studio_campaas_1 valor interno → (pais, tab)
 CAMPAAS_1_MAP = {
-    'Campañas':          ('argentina', 'local'),
-    'Campañas Chile':    ('chile',     'local'),
-    'Campañas Colombia': ('colombia',  'local'),
-    'Campañas Peru':     ('peru',      'local'),
-    'Campañas USA':      ('usa',       'local'),
-    'Internacional':     (None,        'intl'),
+    'Campañas':              ('argentina', 'local'),
+    'Campañas Chile':        ('chile',     'local'),
+    'Campañas Colombia':     ('colombia',  'local'),
+    'Campañas Peru':         ('peru',      'local'),
+    'Campañas USA':          ('usa',       'local'),
+    'US Campaigns':          ('usa',       'local'),   # campo campaas de órdenes USA
+    'Campañas Argentinas':   ('argentina', 'local'),   # campo campaas de algunas órdenes ARG
+    'Campañas Chile':        ('chile',     'local'),   # campo campaas
+    'Campañas Colombia':     ('colombia',  'local'),   # campo campaas
+    'Internacional':         (None,        'intl'),
     # Descartados: 'Campañas Mexico','We Vibe','WOW',False
 }
 
@@ -161,14 +165,6 @@ def classify(tasks, orders):
         v1 = order.get("x_studio_campaas_1") or ""
         v2 = order.get("x_studio_campaas")   or ""
         bu = (order.get("x_studio_bu_1")     or "").strip()
-
-        # DIAG primeras 5 órdenes US
-        oname = order.get("name","")
-        if oname.startswith("US") and not hasattr(classify, '_us_diag'):
-            classify._us_diag = 0
-        if oname.startswith("US") and getattr(classify,'_us_diag',0) < 5:
-            print(f"  DIAG {oname}: v1={repr(v1)} v2={repr(v2)} bu={repr(bu)}")
-            classify._us_diag = getattr(classify,'_us_diag',0) + 1
 
         # Usar v1 primero, v2 como fallback
         clasificacion = CAMPAAS_1_MAP.get(v1) or CAMPAAS_1_MAP.get(v2)
