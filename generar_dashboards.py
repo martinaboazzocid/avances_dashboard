@@ -30,16 +30,55 @@ TC = {
 TC_PRESUP_CLP = 890   # TC especial para presupuesto Chile
 
 # ─── CAMPOS ODOO ───────────────────────────────────────────────────────────────
-SUBTASK_FIELDS = [
+# Campos base siempre presentes en project.task
+SUBTASK_FIELDS_BASE = [
     "id", "name", "stage_id", "date_deadline",
-    "x_studio_campaas", "x_studio_campaas_1",
-    "x_studio_bu_1", "company_id",
-    "sale_order_id",
-    "x_studio_related_field_7v0_1jidluau0",  # implementador
-    "x_studio_fecha_de_publicacin",           # fecha publicación = implementado
-    "x_studio_tipo_de_contenido_1",
-    "project_id",
+    "company_id", "sale_order_id", "project_id",
 ]
+
+# Campos x_studio: se descubren en runtime via fields_get()
+# Nombres canónicos → posibles variantes (Odoo Studio genera nombres con hash)
+FIELD_CANDIDATES = {
+    # campo_interno: [posibles nombres en Odoo]
+    "x_studio_campaas": [
+        "x_studio_campaas",
+        "x_studio_campa_as",
+        "x_studio_campanas",
+        "x_studio_campaa",
+    ],
+    "x_studio_campaas_1": [
+        "x_studio_campaas_1",
+        "x_studio_campa_as_1",
+        "x_studio_campanas_1",
+        "x_studio_campaa_1",
+    ],
+    "x_studio_bu_1": [
+        "x_studio_bu_1",
+        "x_studio_bu",
+        "x_studio_bu_11",
+    ],
+    "x_studio_fecha_de_publicacin": [
+        "x_studio_fecha_de_publicacin",
+        "x_studio_fecha_de_publicacion",
+        "x_studio_fecha_publicacion",
+        "x_studio_fecha_de_publicaci_n",
+    ],
+    "x_studio_related_field_7v0_1jidluau0": [
+        "x_studio_related_field_7v0_1jidluau0",
+        "x_studio_implementador",
+        "x_studio_related_field_7v0",
+    ],
+    "x_studio_tipo_de_contenido_1": [
+        "x_studio_tipo_de_contenido_1",
+        "x_studio_tipo_de_contenido",
+        "x_studio_tipo_contenido",
+    ],
+}
+
+# Mapa resuelto en runtime: nombre_canónico → nombre_real_en_odoo
+FIELD_MAP = {}
+# Lista final de campos a descargar (se construye en discover_fields)
+SUBTASK_FIELDS = list(SUBTASK_FIELDS_BASE)
 
 ORDER_FIELDS = [
     "id", "name", "amount_untaxed", "currency_id",
@@ -214,6 +253,63 @@ def fetch_all(uid, model, domain, fields, batch=2000):
     print(f"    {model}: {len(all_recs)} registros totales.       ")
     return all_recs
 
+# ─── DESCUBRIMIENTO DE CAMPOS ─────────────────────────────────────────────────
+def discover_fields(uid):
+    """Llama a fields_get() para resolver los nombres reales de campos x_studio."""
+    global FIELD_MAP, SUBTASK_FIELDS
+
+    print("  Descubriendo campos de project.task...")
+    resp = odoo_call(f"{ODOO_URL}/web/dataset/call_kw", {
+        "jsonrpc": "2.0", "method": "call", "id": 99,
+        "params": {
+            "model":  "project.task",
+            "method": "fields_get",
+            "args":   [],
+            "kwargs": {
+                "attributes": ["string", "type"],
+                "context": {"allowed_company_ids": [1,2,3,4,5,6]},
+            }
+        }
+    })
+    all_fields = set(resp.get("result", {}).keys())
+
+    # Para cada campo canónico, buscar cuál variante existe en Odoo
+    for canonical, candidates in FIELD_CANDIDATES.items():
+        found = None
+        for c in candidates:
+            if c in all_fields:
+                found = c
+                break
+        if found:
+            FIELD_MAP[canonical] = found
+            if found not in SUBTASK_FIELDS:
+                SUBTASK_FIELDS.append(found)
+            print(f"    {canonical:50s} -> {found}")
+        else:
+            # Buscar por substring como último recurso
+            keyword = canonical.replace("x_studio_", "").replace("_", "")[:8]
+            matches = [f for f in all_fields if f.startswith("x_studio") and keyword in f.replace("_","")]
+            if matches:
+                found = matches[0]
+                FIELD_MAP[canonical] = found
+                if found not in SUBTASK_FIELDS:
+                    SUBTASK_FIELDS.append(found)
+                print(f"    {canonical:50s} ~> {found} (fuzzy)")
+            else:
+                print(f"    {canonical:50s} !! NO ENCONTRADO")
+
+    print(f"  Campos resueltos: {len(FIELD_MAP)}/{len(FIELD_CANDIDATES)}")
+    # Imprimir todos los x_studio disponibles para debugging futuro
+    xfields = sorted([f for f in all_fields if f.startswith("x_studio")])
+    print(f"  Todos los x_studio disponibles ({len(xfields)}): {xfields[:20]}")
+
+
+def _f(t, canonical):
+    """Obtiene valor de un campo usando el mapa resuelto."""
+    real = FIELD_MAP.get(canonical, canonical)
+    return t.get(real)
+
+
 # ─── DESCARGA DE DATOS ─────────────────────────────────────────────────────────
 def download_data(uid):
     print("  Descargando subtareas...")
@@ -272,14 +368,14 @@ def classify_tasks(tasks, orders):
         t["_order"] = order
 
         # ── Traducir labels de selección ──
-        raw1 = t.get("x_studio_campaas") or ""
-        raw2 = t.get("x_studio_campaas_1") or ""
+        raw1 = _f(t, "x_studio_campaas") or ""
+        raw2 = _f(t, "x_studio_campaas_1") or ""
         label2 = SEL_CAMPAAS_1.get(raw2, raw2)
 
         # ── Determinar si es internacional ──
         if label2 == "Campañas Internacionales" or "Internacional" in label2:
             # Atribuir por BU
-            bu = (t.get("x_studio_bu_1") or "").strip()
+            bu = (_f(t, "x_studio_bu_1") or "").strip()
             pais = BU_TO_PAIS.get(bu)
             if pais is None:
                 continue  # BU desconocido → descartar
@@ -324,7 +420,7 @@ def get_amount_usd(t):
     return to_usd(amt, cur_code)
 
 def get_fecha_pub(t):
-    return parse_date(t.get("x_studio_fecha_de_publicacin"))
+    return parse_date(_f(t, "x_studio_fecha_de_publicacin"))
 
 def is_implementado(t):
     return bool(get_fecha_pub(t))
@@ -419,7 +515,7 @@ def _parse_contenido(name):
 def _tipo_contenido(t):
     """Determina el tipo de contenido."""
     c = _parse_contenido(t.get("name", ""))
-    raw_tipo = (t.get("x_studio_tipo_de_contenido_1") or "").lower()
+    raw_tipo = (_f(t, "x_studio_tipo_de_contenido_1") or "").lower()
     nombre_lower = (t.get("name", "") or "").lower()
     # Heurística simple por tipo
     if any(k in nombre_lower or k in c.lower() for k in ["artistico", "artístico", "host", "conducción", "conduccion", "exclusividad"]):
@@ -741,7 +837,7 @@ def build_implementado_html(tasks, kpis, mes_actual, anio_actual, prefix):
     for t in tasks:
         fpub = get_fecha_pub(t)
         if fpub and fpub.year == anio_actual and fpub.month == mes_actual:
-            imp = t.get("x_studio_related_field_7v0_1jidluau0")
+            imp = _f(t, "x_studio_related_field_7v0_1jidluau0")
             if isinstance(imp, list) and len(imp) > 1:
                 imp_name = imp[1]
             elif imp:
@@ -1223,7 +1319,10 @@ def main():
     # 1. Autenticar
     uid = odoo_auth()
 
-    # 2. Descargar datos
+    # 2. Descubrir campos x_studio
+    discover_fields(uid)
+
+    # 3. Descargar datos
     tasks, orders = download_data(uid)
 
     # 3. Clasificar
