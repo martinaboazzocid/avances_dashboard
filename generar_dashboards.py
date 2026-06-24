@@ -60,12 +60,6 @@ ORDER_FIELDS = [
 # FIELD_MAP vacío (ya no se usa discover_fields)
 FIELD_MAP = {}
 
-ORDER_FIELDS = [
-    "id", "name", "amount_untaxed", "currency_id",
-    "state", "partner_id", "company_id",
-    "date_order",
-]
-
 # ─── MAPAS DE CLASIFICACIÓN (confirmados del Excel Tarea__project_task__) ────────
 # La lógica es: mirar x_studio_campaas Y x_studio_campaas_1 de la orden.
 # Si alguno dice el país → local. Si alguno dice Internacional → intl.
