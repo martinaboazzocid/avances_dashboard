@@ -64,7 +64,6 @@ COMPANY_IDS_ALLOWED = [1, 2, 3, 4, 5, 6]  # se incluye 3 en la descarga, se filt
 SEL_CAMPAAS = {
     "Campanas": "Campañas Internacionales",
     "Campañas": "Campañas Internacionales",
-    # agregar otros valores si aparecen
 }
 
 SEL_CAMPAAS_1 = {
@@ -74,7 +73,7 @@ SEL_CAMPAAS_1 = {
     "Colombia": "Campañas Colombia",
     "USA":      "US Campaigns",
     "Peru":     "Campañas Peruanas",
-    "Peru\u00fa": "Campañas Peruanas",
+    "Perú":     "Campañas Peruanas",
 }
 
 # Mapeo BU → país para registros internacionales
@@ -94,34 +93,43 @@ BUDGET_ROWS = {
     "colombia":  {"sheet": "BG COL", "comercial": 21, "artistico": 30, "regional": 37, "internacional": 46},
     "usa":       {"sheet": "BG USA", "comercial": 17, "artistico": 27, "regional": 34, "internacional": 43},
 }
-# Columnas del xlsx: col 3 = Enero, col 14 = Diciembre (1-indexed)
 BUDGET_COL_OFFSET = 3  # col_index = mes + BUDGET_COL_OFFSET - 1
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # AUTENTICACIÓN ODOO
 # ─────────────────────────────────────────────────────────────────────────────
+
+# Sesión compartida para persistir cookies entre llamadas
+_session = requests.Session()
+_session.headers.update({"Content-Type": "application/json"})
+
+
 def odoo_authenticate():
-    """Autentica en Odoo y retorna uid."""
-    resp = requests.post(
-        f"{ODOO_URL}/web/dataset/call_kw",
+    """Autentica en Odoo via /web/session/authenticate y retorna uid."""
+    resp = _session.post(
+        f"{ODOO_URL}/web/session/authenticate",
         json={
             "jsonrpc": "2.0",
             "method": "call",
+            "id": 1,
             "params": {
-                "model": "res.users",
-                "method": "authenticate",
-                "args": [ODOO_DB, ODOO_USER, ODOO_PASSWORD, {}],
-                "kwargs": {},
+                "db":       ODOO_DB,
+                "login":    ODOO_USER,
+                "password": ODOO_PASSWORD,
             },
         },
         timeout=30,
     )
-    result = resp.json().get("result")
-    if not result:
-        raise RuntimeError(f"Autenticación fallida: {resp.json().get('error')}")
-    print(f"✓ Autenticado como uid={result}")
-    return result
+    resp.raise_for_status()
+    data = resp.json()
+    if data.get("error"):
+        raise RuntimeError(f"Autenticación fallida: {data['error']}")
+    uid = data.get("result", {}).get("uid")
+    if not uid:
+        raise RuntimeError(f"Autenticación fallida: uid no recibido. Respuesta: {data}")
+    print(f"✓ Autenticado como uid={uid}")
+    return uid
 
 
 def odoo_call(uid, model, method, args=None, kwargs=None):
@@ -133,20 +141,22 @@ def odoo_call(uid, model, method, args=None, kwargs=None):
     kwargs.setdefault("context", {})
     kwargs["context"]["allowed_company_ids"] = COMPANY_IDS_ALLOWED
 
-    resp = requests.post(
+    resp = _session.post(
         f"{ODOO_URL}/web/dataset/call_kw",
         json={
             "jsonrpc": "2.0",
             "method": "call",
+            "id": 1,
             "params": {
-                "model": model,
+                "model":  model,
                 "method": method,
-                "args": args,
+                "args":   args,
                 "kwargs": kwargs,
             },
         },
         timeout=120,
     )
+    resp.raise_for_status()
     data = resp.json()
     if "error" in data:
         raise RuntimeError(f"Error Odoo ({model}.{method}): {data['error']}")
@@ -190,9 +200,9 @@ def download_all_data(uid):
             args=[[["parent_id", "!=", False]]],
             kwargs={
                 "fields": SUBTASK_FIELDS,
-                "limit": batch,
+                "limit":  batch,
                 "offset": offset,
-                "order": "id asc",
+                "order":  "id asc",
             },
         )
         subtasks.extend(chunk)
@@ -211,9 +221,9 @@ def download_all_data(uid):
             args=[[["state", "in", ["sale", "done"]]]],
             kwargs={
                 "fields": ORDER_FIELDS,
-                "limit": batch,
+                "limit":  batch,
                 "offset": offset,
-                "order": "id asc",
+                "order":  "id asc",
             },
         )
         orders.extend(chunk)
@@ -251,7 +261,6 @@ def classify_subtask(task):
       tab  ∈ {local, internacional}
     None = descartar
     """
-    # Excluir México
     cid = get_company_id(task)
     if cid == 3:
         return None, None
@@ -279,21 +288,20 @@ def classify_subtask(task):
         pais = BU_PAIS.get(bu)
         if pais:
             return pais, "internacional"
-        return None, None  # BU desconocido → descartar
+        return None, None
 
     return None, None
 
 
 def filter_and_classify(subtasks, orders):
     """Aplica filtros post-descarga y clasifica registros por país y tab."""
-    # Índice de órdenes válidas (state sale/done, no México)
     valid_orders = {}
     for o in orders:
         if get_company_id(o) == 3:
             continue
         valid_orders[o["id"]] = o
 
-    classified = {}  # {pais: {local: [...], internacional: [...]}}
+    classified = {}
     for pais in ["argentina", "chile", "colombia", "usa", "peru"]:
         classified[pais] = {"local": [], "internacional": []}
 
@@ -301,7 +309,6 @@ def filter_and_classify(subtasks, orders):
         pais, tab = classify_subtask(task)
         if not pais or not tab:
             continue
-        # Enriquecer con datos de la orden
         oid = task.get("sale_order_id")
         if isinstance(oid, (list, tuple)):
             oid = oid[0] if oid else None
@@ -322,7 +329,6 @@ def filter_and_classify(subtasks, orders):
 # LECTURA DE PRESUPUESTO
 # ─────────────────────────────────────────────────────────────────────────────
 def load_budget():
-    """Carga el archivo de presupuesto y retorna un dict con los valores mensuales."""
     if not BUDGET_FILE.exists():
         print(f"⚠ Archivo de presupuesto no encontrado: {BUDGET_FILE}")
         return {}
@@ -333,8 +339,6 @@ def load_budget():
     for pais, cfg in BUDGET_ROWS.items():
         ws = wb[cfg["sheet"]]
         tc = TC["CLP_BG"] if pais == "chile" else 1.0
-        if pais in ("usa",):
-            tc = 1.0
 
         budget[pais] = {}
         for category in ["comercial", "artistico", "regional", "internacional"]:
@@ -357,7 +361,6 @@ def load_budget():
 # MÉTRICAS
 # ─────────────────────────────────────────────────────────────────────────────
 def get_amount_usd(order):
-    """Convierte el monto de una orden a USD."""
     if not order:
         return 0.0
     amount = order.get("amount_untaxed", 0) or 0
@@ -372,7 +375,6 @@ def get_amount_usd(order):
 
 
 def compute_kpis(tasks, mes_actual=None):
-    """Calcula KPIs principales para un conjunto de tareas."""
     if mes_actual is None:
         mes_actual = date.today().month
 
@@ -389,7 +391,6 @@ def compute_kpis(tasks, mes_actual=None):
         order = t.get("_order")
         monto = get_amount_usd(order)
 
-        # Parsear talento y contenido del nombre de la subtarea
         name = t.get("name", "")
         if "(" in name:
             talento = name[:name.index("(")].strip()
@@ -471,7 +472,6 @@ def pct_color(pct):
 
 
 def build_budget_table(kpis, budget_pais, mes_actual):
-    """Genera tabla de presupuesto vs real."""
     if not budget_pais:
         return "<p>Sin datos de presupuesto.</p>"
 
@@ -483,7 +483,6 @@ def build_budget_table(kpis, budget_pais, mes_actual):
         monthly = budget_pais.get(cat, [0] * 12)
         presup_mes = monthly[mes_actual - 1] if mes_actual <= 12 else 0
         presup_ytd = sum(monthly[:mes_actual])
-        # Real aproximado: proporcional al total implementado
         real_mes = kpis["implementado_mes"] / len(categories)
         real_ytd = kpis["implementado_ytd"] / len(categories)
 
@@ -518,7 +517,6 @@ def build_budget_table(kpis, budget_pais, mes_actual):
 
 
 def build_historial_section(tasks):
-    """Genera tabla de historial por implementador."""
     impl_data = {}
     for t in tasks:
         impl = t.get("x_studio_related_field_7v0_1jidluau0") or "Sin asignar"
@@ -564,7 +562,6 @@ def build_historial_section(tasks):
 
 
 def build_pipeline_section(tasks):
-    """Genera tabla de pipeline (pendientes)."""
     pipeline_tasks = []
     for t in tasks:
         stage = t.get("stage_id")
@@ -605,7 +602,6 @@ def build_pipeline_section(tasks):
 
 
 def build_accionables(kpis, pais, tab):
-    """Genera lista de accionables sugeridos basada en KPIs."""
     items = []
     impl = kpis["implementado_mes"]
     pipe = kpis["pipeline"]
@@ -695,18 +691,17 @@ function showSubTab(parentId, subId, btn) {
 
 
 def build_tab_content(tab_id, tasks, budget_pais, pais, tab, mes_actual):
-    """Construye el HTML de una solapa (local o internacional)."""
     kpis = compute_kpis(tasks, mes_actual)
     badge_class = "badge-local" if tab == "local" else "badge-int"
     badge_label = "Local" if tab == "local" else "Internacional"
 
-    presup_html = build_budget_table(kpis, budget_pais, mes_actual)
+    presup_html   = build_budget_table(kpis, budget_pais, mes_actual)
     pipeline_html = build_pipeline_section(tasks)
     historial_html = build_historial_section(tasks)
     accionables_html = build_accionables(kpis, pais, tab)
 
     sub_tabs = [
-        ("Implementado",  "impl",   f"""
+        ("Implementado", "impl",   f"""
             <div class='kpi-grid'>
               <div class='kpi-card'><div class='label'>Implementado Mes</div>
                 <div class='value'>{fmt_usd(kpis['implementado_mes'])}</div></div>
@@ -717,10 +712,10 @@ def build_tab_content(tab_id, tasks, budget_pais, pais, tab, mes_actual):
               <div class='kpi-card'><div class='label'>Talentos</div>
                 <div class='value'>{kpis['talentos']}</div></div>
             </div>"""),
-        ("Presupuesto",   "presup", presup_html),
-        ("Pipeline",      "pipe",   pipeline_html),
-        ("Historial",     "hist",   historial_html),
-        ("Accionables",   "acc",    accionables_html),
+        ("Presupuesto",  "presup", presup_html),
+        ("Pipeline",     "pipe",   pipeline_html),
+        ("Historial",    "hist",   historial_html),
+        ("Accionables",  "acc",    accionables_html),
     ]
 
     sub_bar = ""
@@ -740,7 +735,6 @@ def build_tab_content(tab_id, tasks, budget_pais, pais, tab, mes_actual):
 
 
 def generate_html(pais, local_tasks, int_tasks, budget, mes_actual):
-    """Genera el HTML completo para un país."""
     label = PAIS_LABELS.get(pais, pais.title())
     fecha = datetime.now().strftime("%d/%m/%Y %H:%M")
     budget_pais = budget.get(pais, {})
@@ -752,7 +746,6 @@ def generate_html(pais, local_tasks, int_tasks, budget, mes_actual):
         f"tab_{pais}_int", int_tasks, budget_pais, pais, "internacional", mes_actual
     )
 
-    first_tab = f"tab_{pais}_local"
     return f"""<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -794,25 +787,20 @@ def main():
         print("✗ ODOO_PASSWORD no configurado. Setear variable de entorno.")
         sys.exit(1)
 
-    # 1. Autenticar
     uid = odoo_authenticate()
-
-    # 2. Descargar datos
     subtasks, orders = download_all_data(uid)
 
-    # 3. Clasificar
     print("\nClasificando registros...")
     classified = filter_and_classify(subtasks, orders)
 
-    # 4. Cargar presupuesto
     print("\nCargando presupuesto...")
     budget = load_budget()
 
-    # 5. Generar HTMLs
     mes_actual = date.today().month
     print(f"\nGenerando dashboards (mes {mes_actual})...")
 
     paises = ["argentina", "chile", "colombia", "usa", "peru"]
+    fecha  = datetime.now().strftime("%d/%m/%Y %H:%M")
     for pais in paises:
         local_tasks = classified[pais]["local"]
         int_tasks   = classified[pais]["internacional"]
@@ -821,9 +809,7 @@ def main():
         outfile.write_text(html, encoding="utf-8")
         print(f"  ✓ docs/{pais}.html ({len(local_tasks)} local, {len(int_tasks)} int)")
 
-    # Index page
-    build_index(paises, fecha=datetime.now().strftime("%d/%m/%Y %H:%M"))
-
+    build_index(paises, fecha=fecha)
     print(f"\n✅ Dashboards generados en {OUTPUT_DIR}/")
 
     if not AUTO_MODE:
@@ -831,7 +817,6 @@ def main():
 
 
 def build_index(paises, fecha):
-    """Genera una landing page con links a todos los dashboards."""
     cards = ""
     for pais in paises:
         label = PAIS_LABELS[pais]
