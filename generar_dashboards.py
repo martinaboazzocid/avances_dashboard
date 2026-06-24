@@ -288,15 +288,14 @@ def classify_tasks(tasks, orders):
         # ── Traducir labels de selección ──
         # x_studio_campaas y x_studio_bu_1 están en sale.order, NO en project.task
         if order:
-            raw1 = order.get("x_studio_campaas") or ""
-            raw2 = order.get("x_studio_campaas_1") or raw1
+            v_campaas_1 = order.get("x_studio_campaas_1") or ""
+            v_campaas   = order.get("x_studio_campaas") or ""
         else:
-            # fallback: campo relacionado copiado en la tarea
-            raw1 = t.get("x_studio_related_field_8rl_1jhbqu80b") or ""
-            raw2 = raw1
-        label2 = SEL_CAMPAAS_1.get(raw2, raw2)
-        if not label2:
-            label2 = SEL_CAMPAAS_1.get(raw1, raw1)
+            v_campaas_1 = t.get("x_studio_related_field_8rl_1jhbqu80b") or ""
+            v_campaas   = ""
+
+        # Buscar primero en campaas_1, luego en campaas como fallback
+        label2 = SEL_CAMPAAS_1.get(v_campaas_1) or SEL_CAMPAAS.get(v_campaas) or ""
 
         # ── Determinar si es internacional ──
         if label2 == "Campañas Internacionales":
