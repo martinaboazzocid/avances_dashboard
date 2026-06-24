@@ -73,12 +73,12 @@ CAMPAAS_1_MAP = {
     'Campañas Colombia':     ('colombia',  'local'),
     'Campañas Peru':         ('peru',      'local'),
     'Campañas USA':          ('usa',       'local'),
-    'US Campaigns':          ('usa',       'local'),   # campo campaas de órdenes USA
-    'Campañas Argentinas':   ('argentina', 'local'),   # campo campaas de algunas órdenes ARG
-    'Campañas Chile':        ('chile',     'local'),   # campo campaas
-    'Campañas Colombia':     ('colombia',  'local'),   # campo campaas
+    'US Campaigns':          ('usa',       'local'),
+    'Campañas Argentinas':   ('argentina', 'local'),
+    'Campañas Colombia':     ('colombia',  'local'),
+    'Campañas Mexico':       ('mexico',    'local'),   # nuevo dashboard México
     'Internacional':         (None,        'intl'),
-    # Descartados: 'Campañas Mexico','We Vibe','WOW',False
+    # Descartados: 'We Vibe','WOW',False
 }
 
 # x_studio_bu_1 → país para internacionales
@@ -98,6 +98,7 @@ PAIS_LABEL = {
     'usa':          'US Campaigns',
     'peru':         'Campañas Peruanas',
     'internacional':'Campañas Internacionales',
+    'mexico':       'Campañas México',
 }
 
 # ─── ODOO JSON-RPC ─────────────────────────────────────────────────────────────
@@ -169,14 +170,15 @@ def download_data():
 # ─── CLASIFICACIÓN ─────────────────────────────────────────────────────────────
 def classify(tasks, orders):
     result = defaultdict(lambda: defaultdict(list))
+    # Asegurar que México existe como key
+    result['mexico']['local']  # inicializar
     stats = Counter()
 
     for t in tasks:
         cid = t.get("company_id")
         if isinstance(cid,list): cid=cid[0]
-        if cid == 3:
-            stats['mexico'] += 1
-            continue
+        # México (company_id=3) ya no se descarta — tiene su propio dashboard
+        # Solo descartar si no tiene orden activa o no clasifica
 
         oid = t.get("sale_order_id")
         if isinstance(oid,list): oid=oid[0]
@@ -292,6 +294,7 @@ BUDGET_CFG = {
     "colombia":  {"sheet":"BG COL","local":7,"comercial":21,"artistico":30,"regional":37,"intl":46,"tc":None},
     "usa":       {"sheet":"BG USA","local":6,"comercial":17,"artistico":27,"regional":34,"intl":43,"tc":None},
     "peru":      {"sheet":None},
+    "mexico":    {"sheet":None},
     "internacional":{"sheet":"BG INT","local":0},
 }
 
@@ -890,7 +893,8 @@ def main():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     output_map = {"argentina":"argentina.html","chile":"chile.html",
                   "colombia":"colombia.html","usa":"usa.html",
-                  "peru":"peru.html","internacional":"internacional.html"}
+                  "peru":"peru.html","internacional":"internacional.html",
+                  "mexico":"mexico.html"}
 
     print(f"\n  Generando HTMLs...")
     for pais, fname in output_map.items():
