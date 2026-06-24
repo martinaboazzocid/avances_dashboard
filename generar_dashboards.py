@@ -813,7 +813,7 @@ def generate_html(pais, local_tasks, intl_tasks, lines, budget, mes, anio):
   <div class="hdr-badge">{label}</div>
   <div class="hdr-date">{now_str}</div>
 </div>
-<div id="{pid}">
+<div id="pg_{pid}">
 <div class="mtabs">
   <div class="mtab local active" onclick="sw('{pid}','local')">
     🏠 Local &nbsp;<span style="opacity:.6;font-weight:400;font-size:12px">{cnt_l} cont · {fmt_usd(usd_l)}</span>
