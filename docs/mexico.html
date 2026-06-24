@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ZAS | Campañas México</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>:root{--bg:#0d0f14;--s1:#161b24;--s2:#1e2535;--bdr:#262f42;
+  --a1:#4f8ef7;--a2:#a78bfa;--a3:#34d399;--a4:#fb923c;--a5:#f472b6;
+  --tx:#e8eaf0;--tx2:#8b93a8;--tx3:#5a6380;--red:#f87171;--yellow:#fbbf24}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',system-ui,sans-serif;font-size:13.5px;line-height:1.5}
+.hdr{background:var(--s1);border-bottom:1px solid var(--bdr);padding:14px 28px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:200;flex-wrap:wrap}
+.hdr-logo{font-size:18px;font-weight:700;color:var(--a1)}.hdr-sep{color:var(--tx3)}
+.hdr-title{font-size:13px;color:var(--tx2);font-weight:500}
+.hdr-badge{margin-left:auto;background:rgba(79,142,247,.12);color:var(--a1);border:1px solid rgba(79,142,247,.3);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:600}
+.hdr-date{font-size:11px;color:var(--tx3)}
+.mtabs{display:flex;border-bottom:2px solid var(--bdr);padding:0 28px;background:var(--s1)}
+.mtab{padding:14px 24px;cursor:pointer;font-size:14px;font-weight:600;color:var(--tx2);border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s}
+.mtab.local.active{color:var(--a1);border-bottom-color:var(--a1)}
+.mtab.intl.active{color:var(--a2);border-bottom-color:var(--a2)}
+.mpanel{display:none;padding:24px 28px}.mpanel.active{display:block}
+.sec-label{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:5px 12px;border-radius:20px;margin-bottom:20px}
+.sec-label.local{background:rgba(79,142,247,.1);color:var(--a1);border:1px solid rgba(79,142,247,.25)}
+.sec-label.intl{background:rgba(167,139,250,.1);color:var(--a2);border:1px solid rgba(167,139,250,.25)}
+.stabs{display:flex;gap:2px;border-bottom:1px solid var(--bdr);margin-bottom:24px;overflow-x:auto}
+.stab{padding:10px 18px;cursor:pointer;font-size:12.5px;font-weight:500;color:var(--tx2);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:all .15s}
+.stab:hover{color:var(--tx)}.stab.active{color:var(--a1);border-bottom-color:var(--a1)}
+.spanel{display:none}.spanel.active{display:block}
+.badge-r{background:rgba(248,113,113,.2);color:var(--red);border-radius:10px;padding:1px 6px;font-size:10px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px;margin-bottom:24px}
+.kpi{background:var(--s1);border:1px solid var(--bdr);border-radius:10px;padding:16px 18px}
+.kpi-l{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--tx3);margin-bottom:7px}
+.kpi-v{font-size:22px;font-weight:700;letter-spacing:-.5px;line-height:1}
+.kpi-s{font-size:11px;color:var(--tx3);margin-top:4px}
+.kpi-n{font-size:10px;color:var(--tx3);margin-top:3px;font-style:italic;opacity:.8}
+.c1{color:var(--a1)}.c2{color:var(--a2)}.c3{color:var(--a3)}.c4{color:var(--a4)}.cred{color:var(--red)}.cyellow{color:var(--yellow)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+@media(max-width:900px){.g2{grid-template-columns:1fr}}
+.card{background:var(--s1);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;margin-bottom:18px}
+.card-h{padding:12px 16px;border-bottom:1px solid var(--bdr);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:var(--tx2);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card-h-note{font-size:10px;color:var(--tx3);font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px}
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.card-b{padding:14px 16px}.note{font-size:11.5px;color:var(--tx3);padding:6px 0}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--tx3);padding:6px 9px;border-bottom:1px solid var(--bdr)}
+th.r{text-align:right}
+td{padding:7px 9px;border-bottom:1px solid #1a2030;font-size:12px;color:var(--tx)}
+td.r{text-align:right;font-variant-numeric:tabular-nums}
+td.m{color:var(--tx2)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(79,142,247,.04)}
+.hbars{display:flex;flex-direction:column;gap:7px}
+.hr{display:flex;align-items:center;gap:10px}
+.hl{width:50px;font-size:11px;color:var(--tx2);text-align:right;flex-shrink:0}
+.ht{flex:1;height:20px;background:var(--bdr);border-radius:3px;overflow:hidden}
+.hf{height:100%;background:linear-gradient(90deg,var(--a1),var(--a2));border-radius:3px;display:flex;align-items:center;padding-left:8px}
+.hv{font-size:10px;font-weight:600;color:rgba(255,255,255,.9)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:10px;margin-bottom:20px}
+.pm{background:var(--s2);border:1px solid var(--bdr);border-radius:10px;padding:14px 12px;text-align:center}
+.pcur{border-color:var(--a1);background:rgba(79,142,247,.07)}
+.pml{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--tx3);margin-bottom:6px}
+.pc{font-size:26px;font-weight:700;color:var(--a2);line-height:1;margin-bottom:3px}
+.pi{font-size:10px;color:var(--tx2)}
+.bgrow{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--bdr)}
+.bgrow:last-child{border-bottom:none}
+.bgtipo{font-size:12px;font-weight:600;width:90px;flex-shrink:0}
+.bgtrk{flex:1;height:11px;background:var(--bdr);border-radius:6px;overflow:hidden;position:relative}
+.bgreal{height:100%;border-radius:6px;position:absolute;top:0;left:0}
+.bgreal.ok{background:var(--a3)}.bgreal.warn{background:var(--yellow)}.bgreal.low{background:var(--red)}.bgreal.over{background:var(--a5)}
+.bgnums{font-size:11px;color:var(--tx2);min-width:175px;text-align:right}
+.bgpct{font-size:11px;font-weight:700;min-width:40px;text-align:right}
+.acc{display:flex;flex-direction:column;gap:10px}
+.ai{border-radius:9px;padding:13px 15px;display:flex;gap:11px;align-items:flex-start}
+.aico{font-size:15px;flex-shrink:0;margin-top:2px}
+.albl{font-size:10px;text-transform:uppercase;letter-spacing:.7px;font-weight:600;margin-bottom:4px}
+.atxt{font-size:13px;line-height:1.6;color:var(--tx)}
+.ai-urgente{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.25)}.ai-urgente .albl{color:var(--red)}
+.ai-alerta{background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25)}.ai-alerta .albl{color:var(--yellow)}
+.ai-riesgo{background:rgba(251,146,60,.08);border:1px solid rgba(251,146,60,.25)}.ai-riesgo .albl{color:var(--a4)}
+.ai-operativo{background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.25)}.ai-operativo .albl{color:var(--a2)}
+.ai-ok{background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.25)}.ai-ok .albl{color:var(--a3)}
+.pill{display:inline-block;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:600}
+.pb{background:rgba(79,142,247,.15);color:var(--a1)}
+.pp{background:rgba(167,139,250,.15);color:var(--a2)}
+.pg{background:rgba(52,211,153,.15);color:var(--a3)}
+.pm2{background:rgba(90,99,128,.2);color:var(--tx2)}
+.fxnote{background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.2);border-radius:8px;padding:9px 13px;font-size:11px;color:var(--tx3);margin-bottom:18px}
+.fxnote strong{color:var(--a2)}
+.sec-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--tx3);margin-bottom:12px;padding-bottom:7px;border-bottom:1px solid var(--bdr)}</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="hdr-logo">ZAS</div><div class="hdr-sep">/</div>
+  <div class="hdr-title">Dashboard de Implementaciones</div>
+  <div class="hdr-badge">Campañas México</div>
+  <div class="hdr-date">24 Jun 2026 · 21:36 hs ARG</div>
+</div>
+<div id="pg_campanas_mexico">
+<div class="mtabs">
+  <div class="mtab local active" onclick="sw('campanas_mexico','local')">
+    🏠 Local &nbsp;<span style="opacity:.6;font-weight:400;font-size:12px">0 cont · —</span>
+  </div>
+  <div class="mtab intl" onclick="sw('campanas_mexico','intl')">
+    🌐 Internacional &nbsp;<span style="opacity:.6;font-weight:400;font-size:12px">0 cont · —</span>
+  </div>
+</div>
+
+<div class="mpanel active" id="campanas_mexico_local">
+  <div class="fxnote">💱 <strong>Todos los importes en USD.</strong> TC MEP: 1508 ARS/USD · BCCh 940 CLP/USD · BanRep ~4.250 COP/USD · BCRP ~3.72 PEN/USD</div>
+  <div class="sec-label local">🏠 Ventas Locales — Campañas México</div>
+  <div class="stabs" id="campanas_mexico_L_nav">
+    <div class="stab active" onclick="sst('campanas_mexico_L','impl')">📊 Implementado</div>
+    <div class="stab" onclick="sst('campanas_mexico_L','bg')">🎯 Presupuesto</div>
+    <div class="stab" onclick="sst('campanas_mexico_L','pipe')">⏳ Pipeline</div>
+    <div class="stab" onclick="sst('campanas_mexico_L','hist')">📅 Historial</div>
+    <div class="stab" onclick="sst('campanas_mexico_L','acc')">⚡ Accionables</div>
+  </div>
+  <div class="spanel active" id="campanas_mexico_L_impl">
+<div class="kpis">
+  <div class="kpi"><div class="kpi-l">Implementado Jun 26</div><div class="kpi-v c1">0</div><div class="kpi-s">contenidos publicados</div></div>
+  <div class="kpi"><div class="kpi-l">Importe</div><div class="kpi-v c3">—</div><div class="kpi-s">en USD</div></div>
+  <div class="kpi"><div class="kpi-l">Tasa Impl.</div><div class="kpi-v c3">0%</div><div class="kpi-s">0 de 0 est.</div><div class="kpi-n">% campañas estimadas efectivamente publicadas</div></div>
+  <div class="kpi"><div class="kpi-l">Campañas Vencidas</div><div class="kpi-v cred">0</div><div class="kpi-s">—</div><div class="kpi-n">Pendientes con fecha estimada ya pasada.</div></div>
+  <div class="kpi"><div class="kpi-l">Pendientes</div><div class="kpi-v c4">0</div><div class="kpi-s">0 sin fecha</div></div>
+  <div class="kpi"><div class="kpi-l">Vel. Cierre</div><div class="kpi-v c2">0</div><div class="kpi-s">días prom.</div><div class="kpi-n">Días desde pedido hasta publicación.</div></div>
+</div>
+<div class="g2">
+  <div class="card"><div class="card-h"><div class="dot" style="background:var(--a2)"></div>Por Tipo</div>
+    <div class="card-b"><div class="tw"><table><thead><tr><th>Tipo</th><th class="r">Cont.</th><th class="r">USD</th></tr></thead><tbody></tbody></table></div></div></div>
+  <div class="card"><div class="card-h"><div class="dot" style="background:var(--a3)"></div>Top Talentos del Mes</div>
+    <div class="card-b"><div class="tw"><table><thead><tr><th>Talento</th><th class="r">Cont.</th><th class="r">USD</th></tr></thead><tbody></tbody></table></div></div></div>
+</div>
+<div class="card"><div class="card-h"><div class="dot" style="background:var(--a4)"></div>Top Clientes del Mes</div>
+  <div class="card-b"><div class="tw"><table><thead><tr><th>Cliente</th><th class="r">Cont.</th><th class="r">USD</th></tr></thead><tbody></tbody></table></div></div></div>
+<div class="card"><div class="card-h"><div class="dot" style="background:var(--a5)"></div>Concentración de Riesgo por Cliente</div>
+  <div class="card-b"><div class="tw"><table><thead><tr><th>Cliente</th><th class="r">Cont.</th><th class="r">USD</th><th class="r">% total</th></tr></thead><tbody></tbody></table></div></div></div>
+<div class="card"><div class="card-h"><div class="dot" style="background:var(--a1)"></div>Por Implementador</div>
+  <div class="card-b"><div class="tw"><table><thead><tr><th>Implementador</th><th class="r">Contenidos</th><th class="r">Campañas</th><th class="r">USD</th></tr></thead><tbody></tbody></table></div></div></div></div>
+  <div class="spanel" id="campanas_mexico_L_bg"><p class="note">Presupuesto no disponible.</p></div>
+  <div class="spanel" id="campanas_mexico_L_pipe"><p class="sec-title">Pipeline por Mes Estimado</p><div class="pgrid"></div><p class="sec-title">Top Pendientes por Importe</p><div class="tw"><table><thead><tr><th>Talento</th><th>Contenido</th><th>Cliente</th><th>Tipo</th><th class=r>USD</th><th>F.Estimada</th></tr></thead><tbody></tbody></table></div></div>
+  <div class="spanel" id="campanas_mexico_L_hist"><div class="g2">
+  <div class="card"><div class="card-h"><div class="dot" style="background:var(--a1)"></div>Contenidos por Mes</div><div class="card-b"><div class="hbars"></div></div></div>
+  <div class="card"><div class="card-h"><div class="dot" style="background:var(--a4)"></div>Top Talentos Histórico</div><div class="card-b"><div class="tw"><table><thead><tr><th>Talento</th><th class="r">Cont.</th><th class="r">USD acum.</th></tr></thead><tbody></tbody></table></div></div></div>
+</div>
+<div class="card" style="margin-bottom:18px"><div class="card-h"><div class="dot" style="background:var(--a3)"></div>Promedio USD por Contenido (por Influencer)<span class="card-h-note">USD del mes ÷ cantidad de contenidos.</span></div>
+  <div class="card-b"><div class="tw"><table><thead><tr><th>Influencer</th></tr></thead><tbody></tbody></table></div></div></div>
+<div class="card"><div class="card-h"><div class="dot" style="background:var(--a5)"></div>Top Clientes Histórico</div>
+  <div class="card-b"><div class="tw"><table><thead><tr><th>Cliente</th><th class="r">Cont.</th><th class="r">USD acum.</th></tr></thead><tbody></tbody></table></div></div></div></div>
+  <div class="spanel" id="campanas_mexico_L_acc"><div class="acc"><div class="ai ai-ok"><span class="aico">✅</span><div><div class="albl">Sin alertas críticas</div><div class="atxt">[Local] No se detectaron alertas para este período.</div></div></div></div></div>
+</div>
+
+<div class="mpanel " id="campanas_mexico_intl">
+  <div class="fxnote">💱 <strong>Todos los importes en USD.</strong> TC MEP: 1508 ARS/USD · BCCh 940 CLP/USD · BanRep ~4.250 COP/USD · BCRP ~3.72 PEN/USD</div>
+  <div class="sec-label intl">🌐 Ventas Internacionales — Campañas México</div>
+  <div class="stabs" id="campanas_mexico_I_nav">
+    <div class="stab active" onclick="sst('campanas_mexico_I','impl')">📊 Implementado</div>
+    <div class="stab" onclick="sst('campanas_mexico_I','bg')">🎯 Presupuesto</div>
+    <div class="stab" onclick="sst('campanas_mexico_I','pipe')">⏳ Pipeline</div>
+    <div class="stab" onclick="sst('campanas_mexico_I','hist')">📅 Historial</div>
+    <div class="stab" onclick="sst('campanas_mexico_I','acc')">⚡ Accionables</div>
+  </div>
+  <div class="spanel active" id="campanas_mexico_I_impl">
+<div class="kpis">
+  <div class="kpi"><div class="kpi-l">Implementado Jun 26</div><div class="kpi-v c1">0</div><div class="kpi-s">contenidos publicados</div></div>
+  <div class="kpi"><div class="kpi-l">Importe</div><div class="kpi-v c3">—</div><div class="kpi-s">en USD</div></div>
+  <div class="kpi"><div class="kpi-l">Tasa Impl.</div><div class="kpi-v c3">0%</div><div class="kpi-s">0 de 0 est.</div><div class="kpi-n">% campañas estimadas efectivamente publicadas</div></div>
+  <div class="kpi"><div class="kpi-l">Campañas Vencidas</div><div class="kpi-v cred">0</div><div class="kpi-s">—</div><div class="kpi-n">Pendientes con fecha estimada ya pasada.</div></div>
+  <div class="kpi"><div class="kpi-l">Pendientes</div><div class="kpi-v c4">0</div><div class="kpi-s">0 sin fecha</div></div>
+  <div class="kpi"><div class="kpi-l">Vel. Cierre</div><div class="kpi-v c2">0</div><div class="kpi-s">días prom.</div><div class="kpi-n">Días desde pedido hasta publicación.</div></div>
+</div>
+<div class="g2">
+  <div class="card"><div class="card-h"><div class="dot" style="background:var(--a2)"></div>Por Tipo</div>
+    <div class="card-b"><div class="tw"><table><thead><tr><th>Tipo</th><th class="r">Cont.</th><th class="r">USD</th></tr></thead><tbody></tbody></table></div></div></div>
+  <div class="card"><div class="card-h"><div class="dot" style="background:var(--a3)"></div>Top Talentos del Mes</div>
+    <div class="card-b"><div class="tw"><table><thead><tr><th>Talento</th><th class="r">Cont.</th><th class="r">USD</th></tr></thead><tbody></tbody></table></div></div></div>
+</div>
+<div class="card"><div class="card-h"><div class="dot" style="background:var(--a4)"></div>Top Clientes del Mes</div>
+  <div class="card-b"><div class="tw"><table><thead><tr><th>Cliente</th><th class="r">Cont.</th><th class="r">USD</th></tr></thead><tbody></tbody></table></div></div></div>
+<div class="card"><div class="card-h"><div class="dot" style="background:var(--a5)"></div>Concentración de Riesgo por Cliente</div>
+  <div class="card-b"><div class="tw"><table><thead><tr><th>Cliente</th><th class="r">Cont.</th><th class="r">USD</th><th class="r">% total</th></tr></thead><tbody></tbody></table></div></div></div>
+<div class="card"><div class="card-h"><div class="dot" style="background:var(--a1)"></div>Por Implementador</div>
+  <div class="card-b"><div class="tw"><table><thead><tr><th>Implementador</th><th class="r">Contenidos</th><th class="r">Campañas</th><th class="r">USD</th></tr></thead><tbody></tbody></table></div></div></div></div>
+  <div class="spanel" id="campanas_mexico_I_bg"><p class="note">Presupuesto no disponible.</p></div>
+  <div class="spanel" id="campanas_mexico_I_pipe"><p class="sec-title">Pipeline por Mes Estimado</p><div class="pgrid"></div><p class="sec-title">Top Pendientes por Importe</p><div class="tw"><table><thead><tr><th>Talento</th><th>Contenido</th><th>Cliente</th><th>Tipo</th><th class=r>USD</th><th>F.Estimada</th></tr></thead><tbody></tbody></table></div></div>
+  <div class="spanel" id="campanas_mexico_I_hist"><div class="g2">
+  <div class="card"><div class="card-h"><div class="dot" style="background:var(--a1)"></div>Contenidos por Mes</div><div class="card-b"><div class="hbars"></div></div></div>
+  <div class="card"><div class="card-h"><div class="dot" style="background:var(--a4)"></div>Top Talentos Histórico</div><div class="card-b"><div class="tw"><table><thead><tr><th>Talento</th><th class="r">Cont.</th><th class="r">USD acum.</th></tr></thead><tbody></tbody></table></div></div></div>
+</div>
+<div class="card" style="margin-bottom:18px"><div class="card-h"><div class="dot" style="background:var(--a3)"></div>Promedio USD por Contenido (por Influencer)<span class="card-h-note">USD del mes ÷ cantidad de contenidos.</span></div>
+  <div class="card-b"><div class="tw"><table><thead><tr><th>Influencer</th></tr></thead><tbody></tbody></table></div></div></div>
+<div class="card"><div class="card-h"><div class="dot" style="background:var(--a5)"></div>Top Clientes Histórico</div>
+  <div class="card-b"><div class="tw"><table><thead><tr><th>Cliente</th><th class="r">Cont.</th><th class="r">USD acum.</th></tr></thead><tbody></tbody></table></div></div></div></div>
+  <div class="spanel" id="campanas_mexico_I_acc"><div class="acc"><div class="ai ai-ok"><span class="aico">✅</span><div><div class="albl">Sin alertas críticas</div><div class="atxt">[Intl] No se detectaron alertas para este período.</div></div></div></div></div>
+</div>
+</div>
+<script>
+function sw(pid,tab){
+  var wrapper=document.getElementById('pg_'+pid);
+  if(!wrapper)return;
+  wrapper.querySelectorAll('.mtabs .mtab').forEach(t=>t.classList.remove('active'));
+  wrapper.querySelectorAll('.mpanel').forEach(p=>p.classList.remove('active'));
+  var el=wrapper.querySelector('.mtabs .mtab.'+tab);
+  if(el)el.classList.add('active');
+  var ep=document.getElementById(pid+'_'+tab);
+  if(ep)ep.classList.add('active');
+}
+function sst(prefix,tab){
+  var nav=document.getElementById(prefix+'_nav');
+  if(!nav)return;
+  nav.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
+  var pp=nav.parentElement;
+  pp.querySelectorAll('.spanel').forEach(p=>p.classList.remove('active'));
+  var trig=nav.querySelector('[onclick*=\''+tab+'\']');
+  if(trig)trig.classList.add('active');
+  var sp=document.getElementById(prefix+'_'+tab);
+  if(sp)sp.classList.add('active');
+}</script>
+</body>
+</html>
