@@ -21,8 +21,8 @@ OUTPUT_DIR  = os.environ.get("OUTPUT_DIR", "docs")
 
 # Tipo de cambio (fallback si no se puede obtener online)
 TC = {
-    "ARS": 1450,   # BCRA
-    "CLP": 980,    # BCCh (presupuesto usa 890)
+    "ARS": 1100,   # BCRA
+    "CLP": 940,    # BCCh (presupuesto usa 890)
     "COP": 4250,   # BanRep
     "PEN": 3.72,   # BCRP
     "USD": 1,
@@ -242,7 +242,7 @@ def _f(t, canonical):
 def download_data(uid):
     print("  Descargando subtareas...")
     tasks = fetch_all(uid, "project.task",
-        domain=[["project_id.name", "ilike", "subtarea"]],
+        domain=[["sale_order_id", "!=", False]],
         fields=SUBTASK_FIELDS,
     )
 
