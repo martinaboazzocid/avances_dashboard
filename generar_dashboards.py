@@ -14,7 +14,7 @@ CONFIGURACIÓN:
     Variables de entorno (o archivo .env local):
         ODOO_URL       = https://zas-talent.odoo.com
         ODOO_DB        = zas-talent
-        ODOO_USER      = martina.boazzo@zastalents.com
+        ODOO_USER      = martu@zastalents.com
         ODOO_PASSWORD  = tu_password
 
 REQUISITOS:
@@ -34,7 +34,7 @@ import openpyxl
 # ─────────────────────────────────────────────────────────────────────────────
 ODOO_URL      = os.environ.get("ODOO_URL",      "https://zas-talent.odoo.com")
 ODOO_DB       = os.environ.get("ODOO_DB",       "zas-talent")
-ODOO_USER     = os.environ.get("ODOO_USER",     "martu@zastalents.com")
+ODOO_USER     = os.environ.get("ODOO_USER",     "martina.boazzo@zastalents.com")
 ODOO_PASSWORD = os.environ.get("ODOO_PASSWORD", "")
 
 AUTO_MODE = "--auto" in sys.argv
@@ -169,7 +169,7 @@ def odoo_call(uid, model, method, args=None, kwargs=None):
 SUBTASK_FIELDS = [
     "id", "name", "project_id", "parent_id", "user_ids",
     "date_deadline", "date_last_stage_update",
-    "x_studio_campaas", "x_studio_campaas_1",
+    # campos x_studio: nombres exactos confirmados via discover_fields()
     "x_studio_bu_1", "x_studio_bu",
     "x_studio_related_field_7v0_1jidluau0",  # implementador
     "sale_order_id", "company_id",
@@ -179,7 +179,6 @@ SUBTASK_FIELDS = [
 ORDER_FIELDS = [
     "id", "name", "company_id", "amount_untaxed",
     "currency_id", "state", "date_order",
-    "x_studio_campaas", "x_studio_campaas_1",
 ]
 
 ORDER_LINE_FIELDS = [
@@ -188,8 +187,19 @@ ORDER_LINE_FIELDS = [
 ]
 
 
+def discover_fields(uid):
+    """Diagnóstico: imprime todos los campos x_ de project.task."""
+    print("🔍 Descubriendo campos custom en project.task...")
+    all_fields = odoo_call(uid, "project.task", "fields_get", args=[], kwargs={"attributes": ["string", "type"]})
+    studio_fields = {k: v for k, v in all_fields.items() if k.startswith("x_")}
+    for fname, finfo in sorted(studio_fields.items()):
+        print(f"  {fname} ({finfo.get('type','?')}): {finfo.get('string','')}")
+    print(f"  → Total campos custom: {len(studio_fields)}")
+
+
 def download_all_data(uid):
     """Descarga subtareas y órdenes de venta de Odoo."""
+    discover_fields(uid)
     print("↓ Descargando subtareas...")
     subtasks = []
     offset = 0
