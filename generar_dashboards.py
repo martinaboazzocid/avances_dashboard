@@ -61,28 +61,26 @@ TC = {
 COMPANY_IDS_ALLOWED = [1, 2, 3, 4, 5, 6]  # se incluye 3 en la descarga, se filtra en Python
 
 # Mapa de traducción del campo de país (x_studio_related_field_8rl_1jhbqu80b)
-# Valor 'Campañas' en ese campo = registro local; el país se infiere de company_id
-# Valor 'Campañas Internacionales' = registro internacional; BU viene de sale.order
 SEL_PAIS = {
-    # Locales — el valor del campo indica directamente el país
-    "Campanas Argentinas":    "argentina",
-    "Campañas Argentinas":    "argentina",
-    "Campanas Chile":         "chile",
-    "Campañas Chile":         "chile",
-    "Campanas Colombia":      "colombia",
-    "Campañas Colombia":      "colombia",
-    "US Campaigns":           "usa",
-    "Campanas Peruanas":      "peru",
-    "Campañas Peruanas":      "peru",
+    # Con país explícito
+    "Campanas Argentinas":       ("argentina", "local"),
+    "Campañas Argentinas":       ("argentina", "local"),
+    "Campanas Chile":            ("chile",     "local"),
+    "Campañas Chile":            ("chile",     "local"),
+    "Campanas Colombia":         ("colombia",  "local"),
+    "Campañas Colombia":         ("colombia",  "local"),
+    "US Campaigns":              ("usa",       "local"),
+    "Campanas Peruanas":         ("peru",      "local"),
+    "Campañas Peruanas":         ("peru",      "local"),
     # Internacionales
-    "Campanas Internacionales":  "internacional",
-    "Campañas Internacionales":  "internacional",
+    "Campanas Internacionales":  ("internacional", "internacional"),
+    "Campañas Internacionales":  ("internacional", "internacional"),
 }
 
-# Cuando el campo devuelve solo 'Campañas' o 'Campanas', inferir país de company_id
+# 'Campañas' genérico → inferir país por company_id (local)
 COMPANY_PAIS = {1: "argentina", 2: "chile", 4: "peru", 5: "usa", 6: "colombia"}
 
-# BU de la orden de venta → país
+# BU de la orden de venta → país (para internacionales)
 BU_PAIS = {
     "ZAS ARGENTINA": "argentina",
     "ZAS CHILE":     "chile",
@@ -185,7 +183,8 @@ def odoo_call(uid, model, method, args=None, kwargs=None):
 SUBTASK_FIELDS = [
     "id", "name", "project_id", "parent_id", "user_ids",
     "date_deadline", "date_last_stage_update",
-    "x_studio_related_field_8rl_1jhbqu80b",   # Pais de campaña (campo confirmado)
+    "x_studio_fecha_de_publicacin",            # fecha de publicación = implementado
+    "x_studio_related_field_8rl_1jhbqu80b",   # Pais de campaña
     "x_studio_related_field_7v0_1jidluau0",   # Responsable de proyecto (implementador)
     "sale_order_id", "company_id",
     "stage_id", "state",
@@ -297,29 +296,30 @@ def classify_subtask(task):
         raw = raw[0] if raw else ""
     raw = str(raw).strip()
 
-    # Intentar match directo en el mapa completo
-    pais_cat = SEL_PAIS.get(raw)
-
-    if pais_cat is None:
-        # Valor genérico 'Campañas'/'Campanas' → inferir por company_id (local)
-        if raw.lower().replace("ñ", "n") in ("campanas", "campañas", "campana"):
-            pais = COMPANY_PAIS.get(cid)
-            return (pais, "local") if pais else (None, None)
+    # Match directo en el mapa
+    resultado = SEL_PAIS.get(raw)
+    if resultado:
+        pais_cat, tab = resultado
+        if pais_cat != "internacional":
+            return pais_cat, tab
+        # Internacional: BU desde la orden de venta
+        order = task.get("_order")
+        if order:
+            bu = order.get("x_studio_bu_1") or ""
+            if isinstance(bu, (list, tuple)):
+                bu = bu[0] if bu else ""
+            bu = str(bu).strip().upper()
+            pais = BU_PAIS.get(bu)
+            if pais:
+                return pais, "internacional"
         return None, None
 
-    if pais_cat != "internacional":
-        return pais_cat, "local"
+    # Valor genérico 'Campañas'/'Campanas' → inferir país por company_id
+    raw_norm = raw.lower().replace("ñ", "n")
+    if raw_norm in ("campanas", "campana"):
+        pais = COMPANY_PAIS.get(cid)
+        return (pais, "local") if pais else (None, None)
 
-    # Internacional: obtener BU desde la orden de venta vinculada
-    order = task.get("_order")
-    if order:
-        bu = order.get("x_studio_bu_1") or ""
-        if isinstance(bu, (list, tuple)):
-            bu = bu[0] if bu else ""
-        bu = str(bu).strip().upper()
-        pais = BU_PAIS.get(bu)
-        if pais:
-            return pais, "internacional"
     return None, None
 
 
@@ -354,24 +354,7 @@ def filter_and_classify(subtasks, orders):
             n = len(classified[pais][tab])
             print(f"  {pais}/{tab}: {n} registros")
 
-    # DIAGNÓSTICO: mostrar valores únicos del campo de país y stages
-    from collections import Counter
-    vals_pais = Counter()
-    vals_stage = Counter()
-    for pais in classified:
-        for tab in classified[pais]:
-            for t in classified[pais][tab]:
-                v = t.get("x_studio_related_field_8rl_1jhbqu80b") or ""
-                vals_pais[str(v)] += 1
-                stage = t.get("stage_id")
-                if isinstance(stage, (list, tuple)) and len(stage) > 1:
-                    vals_stage[stage[1]] += 1
-    print("DIAG valores campo pais (x_studio_related_field_8rl):")
-    for v, n in vals_pais.most_common():
-        print(f"  {n:5d}x  {v!r}")
-    print("DIAG stages:")
-    for v, n in vals_stage.most_common():
-        print(f"  {n:5d}x  {v!r}")
+
 
     return classified
 
@@ -458,12 +441,15 @@ def compute_kpis(tasks, mes_actual=None):
         else:
             stage_name = ""
 
-        implementado = "implementad" in stage_name or "done" in stage_name or "realiz" in stage_name
+        # Implementado = tiene fecha de publicación cargada
+        fecha_pub = t.get("x_studio_fecha_de_publicacin")
+        implementado = bool(fecha_pub)
 
-        deadline = t.get("date_deadline")
-        if deadline:
+        # Usar fecha de publicación para determinar mes de implementación
+        fecha_ref = t.get("x_studio_fecha_de_publicacin") or t.get("date_deadline")
+        if fecha_ref:
             try:
-                dl = date.fromisoformat(str(deadline)[:10])
+                dl = date.fromisoformat(str(fecha_ref)[:10])
                 dl_mes = dl.month
                 dl_anio = dl.year
             except ValueError:
@@ -620,7 +606,7 @@ def build_pipeline_section(tasks):
             stage_name = str(stage[1]).lower() if len(stage) > 1 else ""
         else:
             stage_name = ""
-        implementado = "implementad" in stage_name or "done" in stage_name
+        implementado = bool(t.get("x_studio_fecha_de_publicacin"))
         if not implementado:
             pipeline_tasks.append(t)
 
