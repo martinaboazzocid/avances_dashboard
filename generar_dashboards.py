@@ -30,8 +30,9 @@ TASK_FIELDS = [
 
 ORDER_FIELDS = [
     "id","name","state","company_id","partner_id","date_order",
-    "x_studio_campaas_1",  # país de campaña (fuente primaria)
-    "x_studio_bu_1",       # BU para internacionales
+    "x_studio_campaas_1",        # país de campaña (fuente primaria)
+    "x_studio_bu_1",             # BU para internacionales
+    "x_studio_tipo_de_contrato", # tipo: Comercial, Regional, Artistico, Canje, Agencia
 ]
 
 LINE_FIELDS = [
@@ -225,6 +226,18 @@ def parse_contenido(name):
     return ""
 
 def pill_tipo(t):
+    # Primero leer desde el campo de la orden (fuente confiable)
+    order = t.get("_order")
+    tipo_orden = (order.get("x_studio_tipo_de_contrato") or "") if order else ""
+    if tipo_orden:
+        mapa = {"Comercial":"pb","Regional":"pp","Artistico":"pg",
+                "Artístico":"pg","Agencia":"pb","Canje":"pm2"}
+        label_mapa = {"Comercial":"Comercial","Regional":"Regional",
+                      "Artistico":"Artístico","Artístico":"Artístico",
+                      "Agencia":"Comercial","Canje":"Canje"}
+        if tipo_orden in mapa:
+            return label_mapa[tipo_orden], mapa[tipo_orden]
+    # Fallback por nombre de subtarea
     name = (t.get("name") or "").lower()
     cont = parse_contenido(t.get("name","")).lower()
     txt  = name + cont
