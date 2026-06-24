@@ -30,7 +30,8 @@ TASK_FIELDS = [
 
 ORDER_FIELDS = [
     "id","name","state","company_id","partner_id","date_order",
-    "x_studio_campaas_1",        # país de campaña (fuente primaria)
+    "x_studio_campaas_1",        # país de campaña (campo 1, USA lo usa)
+    "x_studio_campaas",          # país de campaña (campo 2, fallback)
     "x_studio_bu_1",             # BU para internacionales
     "x_studio_tipo_de_contrato", # tipo: Comercial, Regional, Artistico, Canje, Agencia
 ]
@@ -157,15 +158,20 @@ def classify(tasks, orders):
         t["_order"] = order
 
         v1 = order.get("x_studio_campaas_1") or ""
-        clasificacion = CAMPAAS_1_MAP.get(v1)
+        v2 = order.get("x_studio_campaas")   or ""
+        bu = (order.get("x_studio_bu_1")     or "").strip()
+
+        # Usar v1 primero, v2 como fallback
+        clasificacion = CAMPAAS_1_MAP.get(v1) or CAMPAAS_1_MAP.get(v2)
+
         if not clasificacion:
-            stats[f'descartado:{v1}'] += 1
+            stats[f'descartado:v1={v1}:v2={v2}'] += 1
             continue
 
         pais_raw, tab = clasificacion
 
         if tab == 'intl':
-            bu = (order.get("x_studio_bu_1") or "").strip()
+            # Solo cuando el campo dice 'Internacional' → derivar país por bu_1
             pais = BU_TO_PAIS.get(bu)
             if not pais:
                 stats[f'intl_bu_desconocido:{bu}'] += 1
