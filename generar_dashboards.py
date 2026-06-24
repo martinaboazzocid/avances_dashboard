@@ -169,10 +169,7 @@ def odoo_call(uid, model, method, args=None, kwargs=None):
 SUBTASK_FIELDS = [
     "id", "name", "project_id", "parent_id", "user_ids",
     "date_deadline", "date_last_stage_update",
-    "x_studio_related_field_8rl_1jhbqu80b",   # Pais de campaña (antes x_studio_campaas)
-    "x_studio_related_field_8pi_1jhbqk5st",   # Pais de campaña copia (antes x_studio_campaas_1)
-    "x_studio_related_field_5vd_1inm82gdt",   # candidato a BU (selection: "Nuevo Campo relacionado")
-    "x_studio_related_field_7v0_1jidluau0",   # Responsable de proyecto (implementador)
+    "x_studio_related_field_7v0_1jidluau0",   # Responsable de proyecto (implementador) — confirmado
     "sale_order_id", "company_id",
     "stage_id", "state",
 ]
@@ -222,26 +219,19 @@ def download_all_data(uid):
         offset += batch
     print(f"  ✓ {len(subtasks)} subtareas descargadas")
 
-    # ── DIAGNÓSTICO BU: mostrar primeras 10 tareas con campo 5vd no vacío ──
-    print("DIAG BU — primeras tareas con x_studio_related_field_5vd no vacío:")
-    count = 0
-    for t in subtasks:
-        f5vd = t.get("x_studio_related_field_5vd_1inm82gdt")
-        f8rl = t.get("x_studio_related_field_8rl_1jhbqu80b")
-        f8pi = t.get("x_studio_related_field_8pi_1jhbqk5st")
-        if f5vd:
-            print(f"  id={t['id']} name={t['name'][:40]!r}")
-            print(f"    5vd={f5vd!r} | 8rl={f8rl!r} | 8pi={f8pi!r}")
-            count += 1
-            if count >= 10:
-                break
-    if count == 0:
-        print("  NINGUNA tarea tiene valor en 5vd — mostrando x_ de primeras 3:")
-        for t in subtasks[:3]:
-            print(f"  id={t['id']} name={t['name'][:40]!r}")
-            for k, v in t.items():
-                if k.startswith("x_") and v:
-                    print(f"    {k}={v!r}")
+    # ── DIAGNÓSTICO: pedir un registro completo sin filtrar campos ──
+    print("DIAG — campos x_ con valor en primera subtarea (sin filtro de fields):")
+    sample = odoo_call(
+        uid, "project.task", "search_read",
+        args=[[["parent_id", "!=", False]]],
+        kwargs={"limit": 1, "offset": 0, "order": "id desc"},
+    )
+    if sample:
+        t = sample[0]
+        print(f"  Tarea id={t['id']} | {t.get('name','')[:50]!r}")
+        for k, v in sorted(t.items()):
+            if k.startswith("x_") and v not in (False, None, [], ""):
+                print(f"    {k} = {v!r}")
     # ── FIN DIAGNÓSTICO ──
 
     print("↓ Descargando órdenes de venta...")
