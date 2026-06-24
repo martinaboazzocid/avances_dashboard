@@ -1,0 +1,42 @@
+name: Generar Dashboards ZAS
+
+on:
+  schedule:
+    # 12:30 UTC = 9:30am Argentina (UTC-3)
+    - cron: '30 12 * * 1-5'   # Lunes a viernes
+  workflow_dispatch:            # También permite correrlo a mano desde GitHub
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write           # Necesario para hacer commit de los HTMLs
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Generar dashboards
+        env:
+          ODOO_URL: ${{ secrets.ODOO_URL }}
+          ODOO_DB: ${{ secrets.ODOO_DB }}
+          ODOO_USER: ${{ secrets.ODOO_USER }}
+          ODOO_PASSWORD: ${{ secrets.ODOO_PASSWORD }}
+        run: python generar_dashboards.py --auto
+
+      - name: Commit y push de los HTMLs generados
+        run: |
+          git config user.name "ZAS Bot"
+          git config user.email "bot@zastalents.com"
+          git add docs/
+          git diff --staged --quiet || git commit -m "Dashboards actualizados $(TZ='America/Argentina/Buenos_Aires' date '+%d/%m/%Y %H:%M')"
+          git push
