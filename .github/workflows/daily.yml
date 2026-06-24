@@ -12,24 +12,19 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - run: pip install openpyxl requests
 
-      - name: Instalar dependencias
-        run: pip install openpyxl requests
-
-      - name: Diagnosticar Odoo (estructura de proyectos y tareas)
+      - name: Diagnostico estructura datos
         env:
           ODOO_URL:      ${{ secrets.ODOO_URL }}
           ODOO_DB:       ${{ secrets.ODOO_DB }}
           ODOO_USER:     ${{ secrets.ODOO_USER }}
           ODOO_PASSWORD: ${{ secrets.ODOO_PASSWORD }}
-        run: python diagnostico_odoo.py
+        run: python diagnostico2.py
 
       - name: Generar dashboards
         env:
@@ -41,7 +36,7 @@ jobs:
           OUTPUT_DIR:    docs
         run: python generar_dashboards.py --auto
 
-      - name: Commit y push de dashboards
+      - name: Commit y push
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
