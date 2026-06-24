@@ -66,51 +66,35 @@ ORDER_FIELDS = [
     "date_order",
 ]
 
-# ─── MAPAS DE TRADUCCIÓN DE CAMPOS SELECTION ───────────────────────────────────
-# x_studio_campaas (campo 1): valor_interno → label
-# Valores confirmados via diagnostico3 (fields_get + valores reales en Odoo)
-# x_studio_campaas_1 es la fuente primaria (valor_interno → label)
-SEL_CAMPAAS_1 = {
-    'Campañas':          'Campañas Argentinas',   # más común: 680 órdenes
-    'Campañas Chile':    'Campañas Chile',
-    'Campañas Colombia': 'Campañas Colombia',
-    'Campañas Peru':     'Campañas Peru',
-    'Internacional':     'Campañas Internacionales',  # 194 órdenes
-    # Descartados: 'Campañas Mexico', 'We Vibe', 'WOW'
+# ─── MAPAS DE CLASIFICACIÓN (confirmados del Excel Tarea__project_task__) ────────
+# La lógica es: mirar x_studio_campaas Y x_studio_campaas_1 de la orden.
+# Si alguno dice el país → local. Si alguno dice Internacional → intl.
+# Para intl: el país se lee del campo x_studio_related_field_8pi_1jhbqv0jf en la TAREA.
+
+# Valores que identifican cada país local (en cualquiera de los dos campos campaas)
+LOCAL_LABELS = {
+    'Campañas Argentinas': 'argentina',
+    'Campañas Chile':      'chile',
+    'Campañas Colombia':   'colombia',
+    'Campañas Peru':       'peru',
+    'US Campaigns':        'usa',
 }
 
-# x_studio_campaas es fallback cuando campaas_1 es False
-SEL_CAMPAAS = {
-    'US Campaigns':        'US Campaigns',        # 209 órdenes
-    'Internacional':       'Campañas Internacionales',  # 478 órdenes
-    'Campañas Argentinas': 'Campañas Argentinas', # 21 órdenes
-    'Campañas Chile':      'Campañas Chile',
-    'Campañas Colombia':   'Campañas Colombia',
-    # Descartados: 'We Vibe'
+# Valores que identifican internacional (en cualquiera de los dos campos campaas)
+INTL_LABELS = {'Campañas Internacionales'}
+
+# x_studio_related_field_8pi_1jhbqv0jf en la TAREA → país del dashboard internacional
+# Valores confirmados del Excel (columna "Pais de campaña Internacional")
+PAIS_INTL_MAP = {
+    'Internacional - Argentina': 'argentina',
+    'Internacional - Chile':     'chile',
+    'Internacional - Colombia':  'colombia',
+    'Internacional - USA':       'usa',
+    'Internacional - Mexico':    None,   # descartar
+    'Externos':                  None,   # descartar
 }
 
-# BU → país para registros internacionales
-BU_TO_PAIS = {
-    'ZAS ARGENTINA': 'argentina',
-    'ZAS CHILE':     'chile',
-    'ZAS COLOMBIA':  'colombia',
-    'ZAS USA':       'usa',
-    'ZAS PERU':      'peru',
-    'ZAS PERU ':     'peru',
-}
-
-# Label de campaas_1 → país local
-LABEL_TO_PAIS = {
-    'Campañas Argentinas':   'argentina',
-    'Campañas Chile':        'chile',
-    'Campañas Colombia':     'colombia',
-    'Campañas US':           'usa',
-    'US Campaigns':          'usa',    # valor real confirmado en x_studio_campaas
-    'Campañas Peru':         'peru',
-}
-
-# company_id → país fallback
-COMPANY_TO_PAIS = {1: 'argentina', 2: 'chile', 4: 'peru', 5: 'usa', 6: 'colombia'}
+# Descartados en ambos campos: 'Campañas Mexico', 'We Vibe', 'WOW', None/False
 
 # ─── UTILIDADES ────────────────────────────────────────────────────────────────
 def fmt_usd(v):
@@ -285,45 +269,44 @@ def classify_tasks(tasks, orders):
 
         t["_order"] = order
 
-        # ── Traducir labels de selección ──
-        # x_studio_campaas y x_studio_bu_1 están en sale.order, NO en project.task
+        # ── Clasificar usando x_studio_campaas y x_studio_campaas_1 de la orden ──
+        # Lógica confirmada del Excel Tarea__project_task__:
+        # - Si cualquier campo tiene un label local → local
+        # - Si cualquier campo tiene 'Campañas Internacionales' → intl
+        # - Si ambos None/False → descartar
+        v1 = ""  # campaas_1
+        v2 = ""  # campaas
         if order:
-            v_campaas_1 = order.get("x_studio_campaas_1") or ""
-            v_campaas   = order.get("x_studio_campaas") or ""
-        else:
-            v_campaas_1 = t.get("x_studio_related_field_8rl_1jhbqu80b") or ""
-            v_campaas   = ""
+            raw1 = order.get("x_studio_campaas_1") or ""
+            raw2 = order.get("x_studio_campaas") or ""
+            # Traducir valor interno → label (los labels son los mismos que el valor en este caso)
+            v1 = raw1.strip() if raw1 else ""
+            v2 = raw2.strip() if raw2 else ""
 
-        # Buscar primero en campaas_1, luego en campaas como fallback
-        label2 = SEL_CAMPAAS_1.get(v_campaas_1) or SEL_CAMPAAS.get(v_campaas) or ""
+        # Determinar país: mirar los dos campos
+        pais_local = LOCAL_LABELS.get(v1) or LOCAL_LABELS.get(v2)
+        es_intl = (v1 in INTL_LABELS) or (v2 in INTL_LABELS)
 
-        # ── Determinar si es internacional ──
-        if label2 == "Campañas Internacionales":
-            # BU desde la orden de venta
-            if order:
-                bu = (order.get("x_studio_bu_1") or order.get("x_studio_bu") or "").strip()
-            else:
-                bu = ""
-            pais = BU_TO_PAIS.get(bu)
+        if pais_local:
+            t["_pais"] = pais_local
+            t["_tab"]  = "local"
+            classified[pais_local]["local"].append(t)
+
+        elif es_intl:
+            # País del dashboard: leer campo en la TAREA (x_studio_related_field_8pi_1jhbqv0jf)
+            pais_intl_val = (t.get("x_studio_related_field_8pi_1jhbqv0jf") or "").strip()
+            pais = PAIS_INTL_MAP.get(pais_intl_val)
             if pais is None:
-                continue  # BU desconocido → descartar
+                continue  # Externos, Mexico → descartar
             t["_pais"] = pais
             t["_tab"]  = "intl"
-            t["_label2"] = label2
             classified[pais]["intl"].append(t)
-            # También al dashboard Internacional
             classified["internacional"]["intl"].append(t)
 
-        elif label2 in LABEL_TO_PAIS:
-            pais = LABEL_TO_PAIS[label2]
-            t["_pais"] = pais
-            t["_tab"]  = "local"
-            t["_label2"] = label2
-            classified[pais]["local"].append(t)
-
         else:
-            # Label no reconocido → descartar (no usar company_id como fallback)
-            continue
+            continue  # ambos vacíos o valores desconocidos → descartar
+
+
 
     totals = {p: {tab: len(classified[p][tab]) for tab in ("local","intl")} for p in classified}
     print(f"  Clasificación: {totals}")
