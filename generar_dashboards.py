@@ -426,9 +426,11 @@ tr:hover td{background:rgba(79,142,247,.04)}
 
 JS = """
 function sw(pid,tab){
-  document.querySelectorAll('#pg_'+pid+' > .mtabs .mtab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('#pg_'+pid+' > .mpanel').forEach(p=>p.classList.remove('active'));
-  var el=document.querySelector('#pg_'+pid+' > .mtabs .mtab.'+tab);
+  var wrapper=document.getElementById('pg_'+pid);
+  if(!wrapper)return;
+  wrapper.querySelectorAll('.mtabs .mtab').forEach(t=>t.classList.remove('active'));
+  wrapper.querySelectorAll('.mpanel').forEach(p=>p.classList.remove('active'));
+  var el=wrapper.querySelector('.mtabs .mtab.'+tab);
   if(el)el.classList.add('active');
   var ep=document.getElementById(pid+'_'+tab);
   if(ep)ep.classList.add('active');
