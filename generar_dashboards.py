@@ -60,20 +60,36 @@ TC = {
 # 1=ARG, 2=Chile, 3=México (excluir), 4=Perú, 5=USA, 6=Colombia
 COMPANY_IDS_ALLOWED = [1, 2, 3, 4, 5, 6]  # se incluye 3 en la descarga, se filtra en Python
 
-# Mapas de traducción de campos selection de Odoo
-SEL_CAMPAAS = {
-    "Campanas": "Campañas Internacionales",
-    "Campañas": "Campañas Internacionales",
+# Mapa de traducción del campo de país (x_studio_related_field_8rl_1jhbqu80b)
+# Valor 'Campañas' en ese campo = registro local; el país se infiere de company_id
+# Valor 'Campañas Internacionales' = registro internacional; BU viene de sale.order
+SEL_PAIS = {
+    # Locales — el valor del campo indica directamente el país
+    "Campanas Argentinas":    "argentina",
+    "Campañas Argentinas":    "argentina",
+    "Campanas Chile":         "chile",
+    "Campañas Chile":         "chile",
+    "Campanas Colombia":      "colombia",
+    "Campañas Colombia":      "colombia",
+    "US Campaigns":           "usa",
+    "Campanas Peruanas":      "peru",
+    "Campañas Peruanas":      "peru",
+    # Internacionales
+    "Campanas Internacionales":  "internacional",
+    "Campañas Internacionales":  "internacional",
 }
 
-SEL_CAMPAAS_1 = {
-    "Campanas": "Campañas Argentinas",
-    "Campañas": "Campañas Argentinas",
-    "Chile":    "Campañas Chile",
-    "Colombia": "Campañas Colombia",
-    "USA":      "US Campaigns",
-    "Peru":     "Campañas Peruanas",
-    "Perú":     "Campañas Peruanas",
+# Cuando el campo devuelve solo 'Campañas' o 'Campanas', inferir país de company_id
+COMPANY_PAIS = {1: "argentina", 2: "chile", 4: "peru", 5: "usa", 6: "colombia"}
+
+# BU de la orden de venta → país
+BU_PAIS = {
+    "ZAS ARGENTINA": "argentina",
+    "ZAS CHILE":     "chile",
+    "ZAS COLOMBIA":  "colombia",
+    "ZAS USA":       "usa",
+    "ZAS PERU":      "peru",
+    "ZAS PERÚ":      "peru",
 }
 
 # Mapeo BU → país para registros internacionales
@@ -169,7 +185,8 @@ def odoo_call(uid, model, method, args=None, kwargs=None):
 SUBTASK_FIELDS = [
     "id", "name", "project_id", "parent_id", "user_ids",
     "date_deadline", "date_last_stage_update",
-    "x_studio_related_field_7v0_1jidluau0",   # Responsable de proyecto (implementador) — confirmado
+    "x_studio_related_field_8rl_1jhbqu80b",   # Pais de campaña (campo confirmado)
+    "x_studio_related_field_7v0_1jidluau0",   # Responsable de proyecto (implementador)
     "sale_order_id", "company_id",
     "stage_id", "state",
 ]
@@ -177,6 +194,7 @@ SUBTASK_FIELDS = [
 ORDER_FIELDS = [
     "id", "name", "company_id", "amount_untaxed",
     "currency_id", "state", "date_order",
+    "x_studio_bu_1",   # BU del talento (ZAS ARGENTINA, ZAS CHILE, etc.) — en sale.order
 ]
 
 ORDER_LINE_FIELDS = [
@@ -219,20 +237,7 @@ def download_all_data(uid):
         offset += batch
     print(f"  ✓ {len(subtasks)} subtareas descargadas")
 
-    # ── DIAGNÓSTICO: pedir un registro completo sin filtrar campos ──
-    print("DIAG — campos x_ con valor en primera subtarea (sin filtro de fields):")
-    sample = odoo_call(
-        uid, "project.task", "search_read",
-        args=[[["parent_id", "!=", False]]],
-        kwargs={"limit": 1, "offset": 0, "order": "id desc"},
-    )
-    if sample:
-        t = sample[0]
-        print(f"  Tarea id={t['id']} | {t.get('name','')[:50]!r}")
-        for k, v in sorted(t.items()):
-            if k.startswith("x_") and v not in (False, None, [], ""):
-                print(f"    {k} = {v!r}")
-    # ── FIN DIAGNÓSTICO ──
+
 
     print("↓ Descargando órdenes de venta...")
     orders = []
@@ -279,7 +284,7 @@ def translate_sel(field_value, translation_map):
 def classify_subtask(task):
     """
     Retorna (pais, tab) donde:
-      pais ∈ {argentina, chile, colombia, usa, peru, internacional, None}
+      pais ∈ {argentina, chile, colombia, usa, peru, None}
       tab  ∈ {local, internacional}
     None = descartar
     """
@@ -287,29 +292,34 @@ def classify_subtask(task):
     if cid == 3:
         return None, None
 
-    label_1 = translate_sel(task.get("x_studio_related_field_8rl_1jhbqu80b"),  SEL_CAMPAAS)
-    label_2 = translate_sel(task.get("x_studio_related_field_8pi_1jhbqk5st"), SEL_CAMPAAS_1)
-    pais_final = (label_1 + label_2).strip()
+    raw = task.get("x_studio_related_field_8rl_1jhbqu80b") or ""
+    if isinstance(raw, (list, tuple)):
+        raw = raw[0] if raw else ""
+    raw = str(raw).strip()
 
-    LOCAL_MAP = {
-        "Campañas Argentinas": "argentina",
-        "Campañas Chile":      "chile",
-        "Campañas Colombia":   "colombia",
-        "US Campaigns":        "usa",
-        "Campañas Peruanas":   "peru",
-    }
+    # Intentar match directo en el mapa completo
+    pais_cat = SEL_PAIS.get(raw)
 
-    if pais_final in LOCAL_MAP:
-        return LOCAL_MAP[pais_final], "local"
-
-    if "Internacionales" in pais_final or "Internacional" in pais_final:
-        # BU (x_studio_bu_1) ya no existe — inferir país desde company_id
-        cid_to_pais = {1: "argentina", 2: "chile", 4: "peru", 5: "usa", 6: "colombia"}
-        pais = cid_to_pais.get(cid)
-        if pais:
-            return pais, "internacional"
+    if pais_cat is None:
+        # Valor genérico 'Campañas'/'Campanas' → inferir por company_id (local)
+        if raw.lower().replace("ñ", "n") in ("campanas", "campañas", "campana"):
+            pais = COMPANY_PAIS.get(cid)
+            return (pais, "local") if pais else (None, None)
         return None, None
 
+    if pais_cat != "internacional":
+        return pais_cat, "local"
+
+    # Internacional: obtener BU desde la orden de venta vinculada
+    order = task.get("_order")
+    if order:
+        bu = order.get("x_studio_bu_1") or ""
+        if isinstance(bu, (list, tuple)):
+            bu = bu[0] if bu else ""
+        bu = str(bu).strip().upper()
+        pais = BU_PAIS.get(bu)
+        if pais:
+            return pais, "internacional"
     return None, None
 
 
@@ -326,13 +336,15 @@ def filter_and_classify(subtasks, orders):
         classified[pais] = {"local": [], "internacional": []}
 
     for task in subtasks:
-        pais, tab = classify_subtask(task)
-        if not pais or not tab:
-            continue
+        # Enriquecer con orden ANTES de clasificar (classify necesita BU de la orden)
         oid = task.get("sale_order_id")
         if isinstance(oid, (list, tuple)):
             oid = oid[0] if oid else None
         task["_order"] = valid_orders.get(oid) if oid else None
+
+        pais, tab = classify_subtask(task)
+        if not pais or not tab:
+            continue
         task["_pais"] = pais
         task["_tab"] = tab
         classified[pais][tab].append(task)
