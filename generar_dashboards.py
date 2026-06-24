@@ -283,9 +283,13 @@ def classify_tasks(tasks, orders):
             v1 = raw1.strip() if raw1 else ""
             v2 = raw2.strip() if raw2 else ""
 
-        # Determinar país: mirar los dos campos
+        # Determinar país: campaas_1 tiene PRIORIDAD sobre campaas
+        # Caso especial confirmado: campaas='Campañas Argentinas' + campaas_1='US Campaigns' → USA
         pais_local = LOCAL_LABELS.get(v1) or LOCAL_LABELS.get(v2)
         es_intl = (v1 in INTL_LABELS) or (v2 in INTL_LABELS)
+        # Si campaas_1 tiene un valor local válido, sobreescribe campaas
+        if v1 and LOCAL_LABELS.get(v1):
+            pais_local = LOCAL_LABELS[v1]
 
         if pais_local:
             t["_pais"] = pais_local
