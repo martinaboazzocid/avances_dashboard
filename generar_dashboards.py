@@ -232,12 +232,7 @@ def _f(t, canonical):
 def download_data(uid):
     print("  Descargando subtareas...")
     tasks = fetch_all(uid, "project.task",
-        domain=[
-            ["parent_id", "!=", False],
-            "|",
-            ["x_studio_fecha_de_publicacin", "=", False],
-            ["x_studio_fecha_de_publicacin", ">=", "2026-01-01"],
-        ],
+        domain=[["parent_id", "!=", False]],
         fields=SUBTASK_FIELDS,
     )
 
