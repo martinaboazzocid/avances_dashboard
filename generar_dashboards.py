@@ -88,7 +88,8 @@ BU_TO_PAIS = {
     'ZAS COLOMBIA':  'colombia',
     'ZAS USA':       'usa',
     'ZAS PERU':      'peru',
-    # Descartados: 'EXTERNOS','WE VIBE','ZAS MEXICO','WE ECHO'
+    'ZAS MEXICO':    'mexico',
+    # Descartados: 'EXTERNOS','WE VIBE','WE ECHO'
 }
 
 PAIS_LABEL = {
