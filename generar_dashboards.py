@@ -169,9 +169,10 @@ def odoo_call(uid, model, method, args=None, kwargs=None):
 SUBTASK_FIELDS = [
     "id", "name", "project_id", "parent_id", "user_ids",
     "date_deadline", "date_last_stage_update",
-    # campos x_studio: nombres exactos confirmados via discover_fields()
-    "x_studio_bu_1", "x_studio_bu",
-    "x_studio_related_field_7v0_1jidluau0",  # implementador
+    "x_studio_related_field_8rl_1jhbqu80b",   # Pais de campaña (antes x_studio_campaas)
+    "x_studio_related_field_8pi_1jhbqk5st",   # Pais de campaña copia (antes x_studio_campaas_1)
+    "x_studio_related_field_5vd_1inm82gdt",   # candidato a BU (selection: "Nuevo Campo relacionado")
+    "x_studio_related_field_7v0_1jidluau0",   # Responsable de proyecto (implementador)
     "sale_order_id", "company_id",
     "stage_id", "state",
 ]
@@ -199,7 +200,6 @@ def discover_fields(uid):
 
 def download_all_data(uid):
     """Descarga subtareas y órdenes de venta de Odoo."""
-    discover_fields(uid)
     print("↓ Descargando subtareas...")
     subtasks = []
     offset = 0
@@ -221,6 +221,28 @@ def download_all_data(uid):
             break
         offset += batch
     print(f"  ✓ {len(subtasks)} subtareas descargadas")
+
+    # ── DIAGNÓSTICO BU: mostrar primeras 10 tareas con campo 5vd no vacío ──
+    print("DIAG BU — primeras tareas con x_studio_related_field_5vd no vacío:")
+    count = 0
+    for t in subtasks:
+        f5vd = t.get("x_studio_related_field_5vd_1inm82gdt")
+        f8rl = t.get("x_studio_related_field_8rl_1jhbqu80b")
+        f8pi = t.get("x_studio_related_field_8pi_1jhbqk5st")
+        if f5vd:
+            print(f"  id={t['id']} name={t['name'][:40]!r}")
+            print(f"    5vd={f5vd!r} | 8rl={f8rl!r} | 8pi={f8pi!r}")
+            count += 1
+            if count >= 10:
+                break
+    if count == 0:
+        print("  NINGUNA tarea tiene valor en 5vd — mostrando x_ de primeras 3:")
+        for t in subtasks[:3]:
+            print(f"  id={t['id']} name={t['name'][:40]!r}")
+            for k, v in t.items():
+                if k.startswith("x_") and v:
+                    print(f"    {k}={v!r}")
+    # ── FIN DIAGNÓSTICO ──
 
     print("↓ Descargando órdenes de venta...")
     orders = []
@@ -275,8 +297,8 @@ def classify_subtask(task):
     if cid == 3:
         return None, None
 
-    label_1 = translate_sel(task.get("x_studio_campaas"),   SEL_CAMPAAS)
-    label_2 = translate_sel(task.get("x_studio_campaas_1"), SEL_CAMPAAS_1)
+    label_1 = translate_sel(task.get("x_studio_related_field_8rl_1jhbqu80b"),  SEL_CAMPAAS)
+    label_2 = translate_sel(task.get("x_studio_related_field_8pi_1jhbqk5st"), SEL_CAMPAAS_1)
     pais_final = (label_1 + label_2).strip()
 
     LOCAL_MAP = {
@@ -291,11 +313,9 @@ def classify_subtask(task):
         return LOCAL_MAP[pais_final], "local"
 
     if "Internacionales" in pais_final or "Internacional" in pais_final:
-        bu = task.get("x_studio_bu_1") or task.get("x_studio_bu") or ""
-        if isinstance(bu, (list, tuple)):
-            bu = bu[0] if bu else ""
-        bu = str(bu).strip().upper()
-        pais = BU_PAIS.get(bu)
+        # BU (x_studio_bu_1) ya no existe — inferir país desde company_id
+        cid_to_pais = {1: "argentina", 2: "chile", 4: "peru", 5: "usa", 6: "colombia"}
+        pais = cid_to_pais.get(cid)
         if pais:
             return pais, "internacional"
         return None, None
