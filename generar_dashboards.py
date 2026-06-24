@@ -283,11 +283,16 @@ def classify_tasks(tasks, orders):
             v1 = raw1.strip() if raw1 else ""
             v2 = raw2.strip() if raw2 else ""
 
+        # DIAGNÓSTICO: imprimir primeras 20 combinaciones
+        if not hasattr(classify_tasks, '_diag_count'):
+            classify_tasks._diag_count = 0
+        if classify_tasks._diag_count < 20:
+            print(f"  DIAG orden={order.get('name') if order else 'None'} | v1(campaas_1)={repr(v1)} | v2(campaas)={repr(v2)}")
+            classify_tasks._diag_count += 1
+
         # Determinar país: campaas_1 tiene PRIORIDAD sobre campaas
-        # Caso especial confirmado: campaas='Campañas Argentinas' + campaas_1='US Campaigns' → USA
         pais_local = LOCAL_LABELS.get(v1) or LOCAL_LABELS.get(v2)
         es_intl = (v1 in INTL_LABELS) or (v2 in INTL_LABELS)
-        # Si campaas_1 tiene un valor local válido, sobreescribe campaas
         if v1 and LOCAL_LABELS.get(v1):
             pais_local = LOCAL_LABELS[v1]
 
