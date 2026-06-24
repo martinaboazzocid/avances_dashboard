@@ -21,8 +21,8 @@ OUTPUT_DIR  = os.environ.get("OUTPUT_DIR", "docs")
 
 # Tipo de cambio (fallback si no se puede obtener online)
 TC = {
-    "ARS": 1100,   # BCRA
-    "CLP": 940,    # BCCh (presupuesto usa 890)
+    "ARS": 1450,   # BCRA
+    "CLP": 980,    # BCCh (presupuesto usa 890)
     "COP": 4250,   # BanRep
     "PEN": 3.72,   # BCRP
     "USD": 1,
@@ -66,37 +66,51 @@ ORDER_FIELDS = [
     "date_order",
 ]
 
-# ─── MAPAS DE CLASIFICACIÓN (confirmados via diagnostico3) ────────────────────
-# Fuente primaria: x_studio_campaas_1 en sale.order (valor_interno)
-# valor_interno → (pais, tab)  — tab='intl' significa que hay que resolver por BU
-CAMPAAS_1_MAP = {
-    'Campañas':          ('argentina', 'local'),   # label: Campañas Argentinas
-    'Campañas Chile':    ('chile',     'local'),
-    'Campañas Colombia': ('colombia',  'local'),
-    'Campañas Peru':     ('peru',      'local'),
-    'Internacional':     (None,        'intl'),    # label: Campañas Internacionales
-    # descartar todo lo demás: 'Campañas Mexico', 'We Vibe', 'WOW', False
+# ─── MAPAS DE TRADUCCIÓN DE CAMPOS SELECTION ───────────────────────────────────
+# x_studio_campaas (campo 1): valor_interno → label
+# Valores confirmados via diagnostico3 (fields_get + valores reales en Odoo)
+# x_studio_campaas_1 es la fuente primaria (valor_interno → label)
+SEL_CAMPAAS_1 = {
+    'Campañas':          'Campañas Argentinas',   # más común: 680 órdenes
+    'Campañas Chile':    'Campañas Chile',
+    'Campañas Colombia': 'Campañas Colombia',
+    'Campañas Peru':     'Campañas Peru',
+    'Internacional':     'Campañas Internacionales',  # 194 órdenes
+    # Descartados: 'Campañas Mexico', 'We Vibe', 'WOW'
 }
 
-# Fallback: x_studio_campaas en sale.order cuando campaas_1 es False
-CAMPAAS_MAP = {
-    'US Campaigns':        ('usa',       'local'),
-    'Internacional':       (None,        'intl'),
-    'Campañas Argentinas': ('argentina', 'local'),
-    'Campañas Chile':      ('chile',     'local'),
-    'Campañas Colombia':   ('colombia',  'local'),
-    # descartar: 'We Vibe', 'WOW', False
+# x_studio_campaas es fallback cuando campaas_1 es False
+SEL_CAMPAAS = {
+    'US Campaigns':        'US Campaigns',        # 209 órdenes
+    'Internacional':       'Campañas Internacionales',  # 478 órdenes
+    'Campañas Argentinas': 'Campañas Argentinas', # 21 órdenes
+    'Campañas Chile':      'Campañas Chile',
+    'Campañas Colombia':   'Campañas Colombia',
+    # Descartados: 'We Vibe'
 }
 
-# x_studio_bu_1 en sale.order → país (para internacionales)
+# BU → país para registros internacionales
 BU_TO_PAIS = {
     'ZAS ARGENTINA': 'argentina',
     'ZAS CHILE':     'chile',
     'ZAS COLOMBIA':  'colombia',
     'ZAS USA':       'usa',
     'ZAS PERU':      'peru',
-    # descartar: 'WE VIBE', 'ZAS MEXICO', 'EXTERNOS', 'WE ECHO', False
+    'ZAS PERU ':     'peru',
 }
+
+# Label de campaas_1 → país local
+LABEL_TO_PAIS = {
+    'Campañas Argentinas':   'argentina',
+    'Campañas Chile':        'chile',
+    'Campañas Colombia':     'colombia',
+    'Campañas US':           'usa',
+    'US Campaigns':          'usa',    # valor real confirmado en x_studio_campaas
+    'Campañas Peru':         'peru',
+}
+
+# company_id → país fallback
+COMPANY_TO_PAIS = {1: 'argentina', 2: 'chile', 4: 'peru', 5: 'usa', 6: 'colombia'}
 
 # ─── UTILIDADES ────────────────────────────────────────────────────────────────
 def fmt_usd(v):
@@ -218,7 +232,7 @@ def _f(t, canonical):
 def download_data(uid):
     print("  Descargando subtareas...")
     tasks = fetch_all(uid, "project.task",
-        domain=[["parent_id", "!=", False]],
+        domain=[["project_id.name", "ilike", "subtarea"]],
         fields=SUBTASK_FIELDS,
     )
 
@@ -271,27 +285,24 @@ def classify_tasks(tasks, orders):
 
         t["_order"] = order
 
-        # ── Clasificar por campaas_1 (fuente primaria) luego campaas (fallback) ──
-        resultado = None
+        # ── Traducir labels de selección ──
+        # x_studio_campaas y x_studio_bu_1 están en sale.order, NO en project.task
         if order:
-            v1 = order.get("x_studio_campaas_1") or ""
-            v2 = order.get("x_studio_campaas") or ""
-            # Buscar en campaas_1 primero
-            if v1 and v1 in CAMPAAS_1_MAP:
-                resultado = CAMPAAS_1_MAP[v1]
-            # Si no, buscar en campaas
-            elif v2 and v2 in CAMPAAS_MAP:
-                resultado = CAMPAAS_MAP[v2]
+            raw1 = order.get("x_studio_campaas") or ""
+            raw2 = order.get("x_studio_campaas_1") or raw1
+        else:
+            # fallback: campo relacionado copiado en la tarea
+            raw1 = t.get("x_studio_related_field_8rl_1jhbqu80b") or ""
+            raw2 = raw1
+        label2 = SEL_CAMPAAS_1.get(raw2, raw2)
+        if not label2:
+            label2 = SEL_CAMPAAS_1.get(raw1, raw1)
 
-        if resultado is None:
-            continue  # No clasificable → descartar
-
-        pais_raw, tab = resultado
-
-        if tab == 'intl':
-            # Atribuir al país por BU
+        # ── Determinar si es internacional ──
+        if label2 == "Campañas Internacionales":
+            # BU desde la orden de venta
             if order:
-                bu = (order.get("x_studio_bu_1") or "").strip()
+                bu = (order.get("x_studio_bu_1") or order.get("x_studio_bu") or "").strip()
             else:
                 bu = ""
             pais = BU_TO_PAIS.get(bu)
@@ -299,12 +310,21 @@ def classify_tasks(tasks, orders):
                 continue  # BU desconocido → descartar
             t["_pais"] = pais
             t["_tab"]  = "intl"
+            t["_label2"] = label2
             classified[pais]["intl"].append(t)
+            # También al dashboard Internacional
             classified["internacional"]["intl"].append(t)
-        else:
-            t["_pais"] = pais_raw
+
+        elif label2 in LABEL_TO_PAIS:
+            pais = LABEL_TO_PAIS[label2]
+            t["_pais"] = pais
             t["_tab"]  = "local"
-            classified[pais_raw]["local"].append(t)
+            t["_label2"] = label2
+            classified[pais]["local"].append(t)
+
+        else:
+            # Label no reconocido → descartar (no usar company_id como fallback)
+            continue
 
     totals = {p: {tab: len(classified[p][tab]) for tab in ("local","intl")} for p in classified}
     print(f"  Clasificación: {totals}")
@@ -312,32 +332,15 @@ def classify_tasks(tasks, orders):
 
 # ─── CÁLCULO DE KPIs ───────────────────────────────────────────────────────────
 def get_amount_usd(t):
-    """Retorna el importe de la subtarea en USD.
-    Usa x_studio_related_field_52s_1j0ff39s4 (Importe de la línea)
-    y x_studio_related_field_6o9_1jhbqk5st (Moneda).
-    """
-    # Importe de la subtarea (campo confirmado en diagnostico2)
-    amt = t.get("x_studio_related_field_52s_1j0ff39s4") or 0
-    if not amt:
-        # fallback: subtotal
-        amt = t.get("x_studio_subtotal") or 0
-    if not amt:
-        return 0.0
-    # Moneda de la subtarea
-    cur = t.get("x_studio_related_field_6o9_1jhbqk5st")
-    if isinstance(cur, list) and len(cur) > 1:
-        cur_code = cur[1].strip().upper()
-    elif isinstance(cur, str):
-        cur_code = cur.strip().upper()
-    else:
-        # fallback: moneda de la orden
-        order = t.get("_order")
-        if order:
-            cur2 = order.get("currency_id")
-            cur_code = cur2[1].strip().upper() if isinstance(cur2, list) else "USD"
-        else:
-            cur_code = "USD"
-    return to_usd(float(amt), cur_code)
+    """Retorna el importe en USD de una tarea."""
+    order = t.get("_order")
+    if not order: return 0.0
+    amt = order.get("amount_untaxed") or 0
+    cur = order.get("currency_id")
+    cur_code = cur[1] if isinstance(cur, list) and len(cur) > 1 else "USD"
+    # Extraer código limpio (ej: "ARS" de "ARS" o de "[1, 'ARS']")
+    cur_code = cur_code.strip().upper()
+    return to_usd(amt, cur_code)
 
 def get_fecha_pub(t):
     return parse_date(t.get("x_studio_fecha_de_publicacin"))
