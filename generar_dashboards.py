@@ -134,6 +134,7 @@ def download_data():
     lines  = {l["id"]: l for l in lines_raw}
 
     print(f"  ✓ {len(tasks)} tareas, {len(orders)} órdenes, {len(lines)} líneas")
+
     return tasks, orders, lines
 
 # ─── CLASIFICACIÓN ─────────────────────────────────────────────────────────────
@@ -160,6 +161,14 @@ def classify(tasks, orders):
         v1 = order.get("x_studio_campaas_1") or ""
         v2 = order.get("x_studio_campaas")   or ""
         bu = (order.get("x_studio_bu_1")     or "").strip()
+
+        # DIAG primeras 5 órdenes US
+        oname = order.get("name","")
+        if oname.startswith("US") and not hasattr(classify, '_us_diag'):
+            classify._us_diag = 0
+        if oname.startswith("US") and getattr(classify,'_us_diag',0) < 5:
+            print(f"  DIAG {oname}: v1={repr(v1)} v2={repr(v2)} bu={repr(bu)}")
+            classify._us_diag = getattr(classify,'_us_diag',0) + 1
 
         # Usar v1 primero, v2 como fallback
         clasificacion = CAMPAAS_1_MAP.get(v1) or CAMPAAS_1_MAP.get(v2)
