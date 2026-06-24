@@ -146,6 +146,10 @@ def pct_css_color(pct):
     return "var(--red)"
 
 # ─── ODOO JSON-RPC ─────────────────────────────────────────────────────────────
+import http.cookiejar as _cj
+_cookie_jar = _cj.CookieJar()
+_opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(_cookie_jar))
+
 def odoo_call(url, payload):
     data = json.dumps(payload).encode("utf-8")
     req  = urllib.request.Request(
@@ -154,24 +158,25 @@ def odoo_call(url, payload):
         headers={"Content-Type": "application/json"},
         method="POST",
     )
-    with urllib.request.urlopen(req, timeout=60) as r:
+    with _opener.open(req, timeout=120) as r:
         return json.loads(r.read())
 
 def odoo_auth():
     print("  Autenticando en Odoo...")
-    resp = odoo_call(f"{ODOO_URL}/web/dataset/call_kw", {
+    # Odoo 19: usar /web/session/authenticate (no /web/dataset/call_kw)
+    resp = odoo_call(f"{ODOO_URL}/web/session/authenticate", {
         "jsonrpc": "2.0", "method": "call", "id": 1,
         "params": {
-            "model": "res.users",
-            "method": "authenticate",
-            "args": [ODOO_DB, ODOO_USER, ODOO_PASS, {}],
-            "kwargs": {},
+            "db":       ODOO_DB,
+            "login":    ODOO_USER,
+            "password": ODOO_PASS,
         }
     })
-    uid = resp.get("result")
+    result = resp.get("result", {})
+    uid = result.get("uid")
     if not uid:
-        raise Exception(f"Auth fallida: {resp.get('error', 'sin UID')}")
-    print(f"  ✓ UID={uid}")
+        raise Exception(f"Auth fallida: {resp.get('error', result)}")
+    print(f"  OK UID={uid} ({result.get('name', '')})")
     return uid
 
 def odoo_search_read(uid, model, domain, fields, limit=5000, offset=0):
@@ -179,13 +184,13 @@ def odoo_search_read(uid, model, domain, fields, limit=5000, offset=0):
     resp = odoo_call(f"{ODOO_URL}/web/dataset/call_kw", {
         "jsonrpc": "2.0", "method": "call", "id": 2,
         "params": {
-            "model": model,
+            "model":  model,
             "method": "search_read",
-            "args": [domain],
+            "args":   [domain],
             "kwargs": {
-                "fields": fields,
-                "limit": limit,
-                "offset": offset,
+                "fields":  fields,
+                "limit":   limit,
+                "offset":  offset,
                 "context": ctx,
             }
         }
