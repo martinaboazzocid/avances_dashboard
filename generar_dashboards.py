@@ -21,8 +21,8 @@ OUTPUT_DIR  = os.environ.get("OUTPUT_DIR", "docs")
 
 # Tipo de cambio (fallback si no se puede obtener online)
 TC = {
-    "ARS": 1100,   # BCRA
-    "CLP": 940,    # BCCh (presupuesto usa 890)
+    "ARS": 1450,   # BCRA
+    "CLP": 980,    # BCCh (presupuesto usa 890)
     "COP": 4250,   # BanRep
     "PEN": 3.72,   # BCRP
     "USD": 1,
@@ -30,55 +30,35 @@ TC = {
 TC_PRESUP_CLP = 890   # TC especial para presupuesto Chile
 
 # ─── CAMPOS ODOO ───────────────────────────────────────────────────────────────
-# Campos base siempre presentes en project.task
-SUBTASK_FIELDS_BASE = [
+# ─── CAMPOS CONFIRMADOS (desde Campos__ir_model_fields_.xlsx) ──────────────────
+# Campos en project.task
+SUBTASK_FIELDS = [
     "id", "name", "stage_id", "date_deadline",
     "company_id", "sale_order_id", "project_id",
+    # Pais de campaña (campo relacionado al sale_order en la tarea)
+    "x_studio_related_field_8rl_1jhbqu80b",   # Pais de campaña
+    "x_studio_related_field_8pi_1jhbqv0jf",   # Pais de campaña (copia)
+    # Fecha de publicación = criterio de implementado
+    "x_studio_fecha_de_publicacin",
+    # Responsable / Implementador
+    "x_studio_related_field_7v0_1jidluau0",
+    # Fecha estimada (para pipeline)
+    "x_studio_fecha_limite_ops",
 ]
 
-# Campos x_studio: se descubren en runtime via fields_get()
-# Nombres canónicos → posibles variantes (Odoo Studio genera nombres con hash)
-FIELD_CANDIDATES = {
-    # campo_interno: [posibles nombres en Odoo]
-    "x_studio_campaas": [
-        "x_studio_campaas",
-        "x_studio_campa_as",
-        "x_studio_campanas",
-        "x_studio_campaa",
-    ],
-    "x_studio_campaas_1": [
-        "x_studio_campaas_1",
-        "x_studio_campa_as_1",
-        "x_studio_campanas_1",
-        "x_studio_campaa_1",
-    ],
-    "x_studio_bu_1": [
-        "x_studio_bu_1",
-        "x_studio_bu",
-        "x_studio_bu_11",
-    ],
-    "x_studio_fecha_de_publicacin": [
-        "x_studio_fecha_de_publicacin",
-        "x_studio_fecha_de_publicacion",
-        "x_studio_fecha_publicacion",
-        "x_studio_fecha_de_publicaci_n",
-    ],
-    "x_studio_related_field_7v0_1jidluau0": [
-        "x_studio_related_field_7v0_1jidluau0",
-        "x_studio_implementador",
-        "x_studio_related_field_7v0",
-    ],
-    "x_studio_tipo_de_contenido_1": [
-        "x_studio_tipo_de_contenido_1",
-        "x_studio_tipo_de_contenido",
-        "x_studio_tipo_contenido",
-    ],
-}
+# Campos en sale.order (se descargan por separado)
+ORDER_FIELDS = [
+    "id", "name", "amount_untaxed", "currency_id",
+    "state", "partner_id", "company_id", "date_order",
+    # País de campaña en la orden
+    "x_studio_campaas",    # Pais de campaña (campo 1)
+    "x_studio_campaas_1",  # Pais de campaña (campo 2 — el que diferencia)
+    "x_studio_bu_1",       # BU del talento (para internacionales)
+    "x_studio_bu",         # BU alternativo
+]
 
-# Mapa resuelto en runtime: nombre_canónico → nombre_real_en_odoo
+# FIELD_MAP vacío (ya no se usa discover_fields)
 FIELD_MAP = {}
-# Lista final de campos a descargar (se construye en discover_fields)
-SUBTASK_FIELDS = list(SUBTASK_FIELDS_BASE)
 
 ORDER_FIELDS = [
     "id", "name", "amount_untaxed", "currency_id",
@@ -253,61 +233,9 @@ def fetch_all(uid, model, domain, fields, batch=2000):
     print(f"    {model}: {len(all_recs)} registros totales.       ")
     return all_recs
 
-# ─── DESCUBRIMIENTO DE CAMPOS ─────────────────────────────────────────────────
-def discover_fields(uid):
-    """Llama a fields_get() para resolver los nombres reales de campos x_studio."""
-    global FIELD_MAP, SUBTASK_FIELDS
-
-    print("  Descubriendo campos de project.task...")
-    resp = odoo_call(f"{ODOO_URL}/web/dataset/call_kw", {
-        "jsonrpc": "2.0", "method": "call", "id": 99,
-        "params": {
-            "model":  "project.task",
-            "method": "fields_get",
-            "args":   [],
-            "kwargs": {
-                "attributes": ["string", "type"],
-                "context": {"allowed_company_ids": [1,2,3,4,5,6]},
-            }
-        }
-    })
-    all_fields = set(resp.get("result", {}).keys())
-
-    # Para cada campo canónico, buscar cuál variante existe en Odoo
-    for canonical, candidates in FIELD_CANDIDATES.items():
-        found = None
-        for c in candidates:
-            if c in all_fields:
-                found = c
-                break
-        if found:
-            FIELD_MAP[canonical] = found
-            if found not in SUBTASK_FIELDS:
-                SUBTASK_FIELDS.append(found)
-            print(f"    {canonical:50s} -> {found}")
-        else:
-            # Buscar por substring como último recurso
-            keyword = canonical.replace("x_studio_", "").replace("_", "")[:8]
-            matches = [f for f in all_fields if f.startswith("x_studio") and keyword in f.replace("_","")]
-            if matches:
-                found = matches[0]
-                FIELD_MAP[canonical] = found
-                if found not in SUBTASK_FIELDS:
-                    SUBTASK_FIELDS.append(found)
-                print(f"    {canonical:50s} ~> {found} (fuzzy)")
-            else:
-                print(f"    {canonical:50s} !! NO ENCONTRADO")
-
-    print(f"  Campos resueltos: {len(FIELD_MAP)}/{len(FIELD_CANDIDATES)}")
-    # Imprimir todos los x_studio disponibles para debugging futuro
-    xfields = sorted([f for f in all_fields if f.startswith("x_studio")])
-    print(f"  Todos los x_studio disponibles ({len(xfields)}): {xfields[:20]}")
-
-
 def _f(t, canonical):
-    """Obtiene valor de un campo usando el mapa resuelto."""
-    real = FIELD_MAP.get(canonical, canonical)
-    return t.get(real)
+    """Obtiene valor de un campo (alias para t.get, mantenido por compatibilidad)."""
+    return t.get(canonical)
 
 
 # ─── DESCARGA DE DATOS ─────────────────────────────────────────────────────────
@@ -368,14 +296,25 @@ def classify_tasks(tasks, orders):
         t["_order"] = order
 
         # ── Traducir labels de selección ──
-        raw1 = _f(t, "x_studio_campaas") or ""
-        raw2 = _f(t, "x_studio_campaas_1") or ""
+        # x_studio_campaas y x_studio_bu_1 están en sale.order, NO en project.task
+        if order:
+            raw1 = order.get("x_studio_campaas") or ""
+            raw2 = order.get("x_studio_campaas_1") or raw1
+        else:
+            # fallback: campo relacionado copiado en la tarea
+            raw1 = t.get("x_studio_related_field_8rl_1jhbqu80b") or ""
+            raw2 = raw1
         label2 = SEL_CAMPAAS_1.get(raw2, raw2)
+        if not label2:
+            label2 = SEL_CAMPAAS_1.get(raw1, raw1)
 
         # ── Determinar si es internacional ──
         if label2 == "Campañas Internacionales" or "Internacional" in label2:
-            # Atribuir por BU
-            bu = (_f(t, "x_studio_bu_1") or "").strip()
+            # BU desde la orden de venta
+            if order:
+                bu = (order.get("x_studio_bu_1") or order.get("x_studio_bu") or "").strip()
+            else:
+                bu = ""
             pais = BU_TO_PAIS.get(bu)
             if pais is None:
                 continue  # BU desconocido → descartar
@@ -420,7 +359,12 @@ def get_amount_usd(t):
     return to_usd(amt, cur_code)
 
 def get_fecha_pub(t):
-    return parse_date(_f(t, "x_studio_fecha_de_publicacin"))
+    return parse_date(t.get("x_studio_fecha_de_publicacin"))
+
+def get_fecha_estimada(t):
+    """Fecha estimada para pipeline: x_studio_fecha_limite_ops (Fecha Estimada) o date_deadline."""
+    v = t.get("x_studio_fecha_limite_ops") or t.get("date_deadline")
+    return parse_date(v)
 
 def is_implementado(t):
     return bool(get_fecha_pub(t))
@@ -471,7 +415,7 @@ def compute_kpis(tasks, mes_actual, anio_actual):
         else:
             # Pendiente
             pendientes.append(t)
-            ddl = parse_date(t.get("date_deadline"))
+            ddl = get_fecha_estimada(t)
             if ddl and ddl < today:
                 vencidas.append(t)
 
@@ -479,9 +423,9 @@ def compute_kpis(tasks, mes_actual, anio_actual):
 
     # Tasa de implementación: implementados_mes / (implementados_mes + pendientes_con_fecha_este_mes)
     pendientes_mes = [t for t in pendientes
-                      if parse_date(t.get("date_deadline")) and
-                      parse_date(t.get("date_deadline")).year == anio_actual and
-                      parse_date(t.get("date_deadline")).month == mes_actual]
+                      if get_fecha_estimada(t) and
+                      get_fecha_estimada(t).year == anio_actual and
+                      get_fecha_estimada(t).month == mes_actual]
     total_estimados = cnt_mes + len(pendientes_mes)
     tasa = cnt_mes / total_estimados if total_estimados else 0
 
@@ -497,7 +441,7 @@ def compute_kpis(tasks, mes_actual, anio_actual):
         "pendientes":         pendientes,
         "vencidas":           vencidas,
         "vel_cierre":         vel_cierre,
-        "sin_fecha":          sum(1 for t in pendientes if not parse_date(t.get("date_deadline"))),
+        "sin_fecha":          sum(1 for t in pendientes if not get_fecha_estimada(t)),
     }
 
 def _parse_talento(name):
@@ -993,7 +937,7 @@ def build_pipeline_html(tasks, mes_actual, anio_actual):
     by_mes = defaultdict(list)
     sin_fecha_list = []
     for t in pendientes:
-        ddl = parse_date(t.get("date_deadline"))
+        ddl = get_fecha_estimada(t)
         if ddl:
             by_mes[(ddl.year, ddl.month)].append(t)
         else:
@@ -1016,8 +960,8 @@ def build_pipeline_html(tasks, mes_actual, anio_actual):
 
     # Vencidas
     vencidas = sorted(
-        [t for t in pendientes if (parse_date(t.get("date_deadline")) or date.max) < today],
-        key=lambda t: parse_date(t.get("date_deadline")) or date.max
+        [t for t in pendientes if (get_fecha_estimada(t) or date.max) < today],
+        key=lambda t: get_fecha_estimada(t) or date.max
     )
 
     def task_row(t, show_dias=True):
@@ -1030,7 +974,7 @@ def build_pipeline_html(tasks, mes_actual, anio_actual):
             cli = order["partner_id"][1] if isinstance(order["partner_id"], list) else ""
         tipo = _tipo_contenido(t)
         usd = get_amount_usd(t)
-        ddl = parse_date(t.get("date_deadline"))
+        ddl = get_fecha_estimada(t)
         ddl_str = ddl.strftime("%d/%m/%Y") if ddl else "—"
         dias_td = ""
         if show_dias and ddl and ddl < today:
@@ -1177,8 +1121,8 @@ def build_accionables_html(kpis, pais, tab):
     if vencidas:
         # Buscar la más urgente
         mas_urgente = max(vencidas, key=lambda t: (
-            (date.today() - parse_date(t.get("date_deadline"))).days
-            if parse_date(t.get("date_deadline")) else 0
+            (date.today() - get_fecha_estimada(t)).days
+            if get_fecha_estimada(t) else 0
         ))
         ddl_mu = parse_date(mas_urgente.get("date_deadline"))
         dias_mu = (date.today() - ddl_mu).days if ddl_mu else 0
@@ -1319,10 +1263,7 @@ def main():
     # 1. Autenticar
     uid = odoo_auth()
 
-    # 2. Descubrir campos x_studio
-    discover_fields(uid)
-
-    # 3. Descargar datos
+    # 2. Descargar datos
     tasks, orders = download_data(uid)
 
     # 3. Clasificar
