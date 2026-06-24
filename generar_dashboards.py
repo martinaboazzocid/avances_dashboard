@@ -17,7 +17,32 @@ BUDGET_FILE = os.environ.get("BUDGET_FILE", "Base_Regional__2_.xlsx")
 OUTPUT_DIR  = os.environ.get("OUTPUT_DIR", "docs")
 
 # Tipos de cambio a USD
-TC = {'ARS':1100,'CLP':940,'COP':4250,'PEN':3.72,'USD':1,'MXN':17}
+def get_mep():
+    """Obtiene el dólar MEP del día. Fallback: 1450."""
+    try:
+        req = urllib.request.Request(
+            "https://dolarapi.com/v1/dolares/bolsa",
+            headers={"User-Agent":"Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=5) as r:
+            d = json.loads(r.read())
+            if "venta" in d:
+                return float(d["venta"])
+    except Exception:
+        pass
+    try:
+        req = urllib.request.Request(
+            "https://api.bluelytics.com.ar/v2/latest",
+            headers={"User-Agent":"Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=5) as r:
+            d = json.loads(r.read())
+            if "oficial" in d:
+                return float(d["oficial"]["value_sell"])
+    except Exception:
+        pass
+    return 1450.0
+
+TC_ARS = get_mep()
+TC = {'ARS': TC_ARS, 'CLP':940, 'COP':4250, 'PEN':3.72, 'USD':1, 'MXN':17}
 TC_PRESUP_CLP = 890
 
 # ─── CAMPOS A DESCARGAR ────────────────────────────────────────────────────────
@@ -774,7 +799,8 @@ def build_tab(pid, prefix, tab_cls, sec_label, tasks, lines, budget_pais, pais, 
     badge     = f' <span class="badge-r">{venc_cnt}</span>' if venc_cnt else ""
     cnt_total = len(tasks)
     usd_total = sum(get_importe_usd(t,lines) for t in tasks if get_fecha_pub(t))
-    fxnote = '<div class="fxnote">💱 <strong>Todos los importes en USD.</strong> TC: BCRA ~1.100 ARS/USD · BCCh 940 CLP/USD · BanRep ~4.250 COP/USD · BCRP ~3.72 PEN/USD</div>'
+    tc_ars_str = f"{TC_ARS:.0f}"
+    fxnote = f'<div class="fxnote">💱 <strong>Todos los importes en USD.</strong> TC MEP: {tc_ars_str} ARS/USD · BCCh 940 CLP/USD · BanRep ~4.250 COP/USD · BCRP ~3.72 PEN/USD</div>'
     return f"""
 <div class="mpanel {active_cls}" id="{pid}_{tab_cls}">
   {fxnote}
@@ -853,6 +879,7 @@ def main():
     print(f"  ZAS Dashboards — {now.strftime('%d/%m/%Y %H:%M')}")
     print(f"{'='*55}\n")
 
+    print(f'  TC MEP ARS/USD: {TC_ARS:.0f}')
     odoo_auth()
     tasks, orders, lines = download_data()
     classified = classify(tasks, orders)
