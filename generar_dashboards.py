@@ -242,7 +242,7 @@ def _f(t, canonical):
 def download_data(uid):
     print("  Descargando subtareas...")
     tasks = fetch_all(uid, "project.task",
-        domain=[["sale_order_id", "!=", False]],
+        domain=[["parent_id", "!=", False]],
         fields=SUBTASK_FIELDS,
     )
 
