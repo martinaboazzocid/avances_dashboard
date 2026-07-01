@@ -14,6 +14,7 @@ ODOO_DB   = os.environ.get("ODOO_DB",   "zas-talent")
 ODOO_USER = os.environ.get("ODOO_USER", "martina.boazzo@zastalents.com")
 ODOO_PASS = os.environ.get("ODOO_PASSWORD", "")
 BUDGET_FILE = os.environ.get("BUDGET_FILE", "Base_Regional__2_.xlsx")
+OBJETIVOS_FILE = os.environ.get("OBJETIVOS_FILE", "Objetivos_talentos_CLAUDE.xlsx")
 OUTPUT_DIR  = os.environ.get("OUTPUT_DIR", "docs")
 
 # Tipos de cambio a USD
@@ -354,6 +355,144 @@ def load_budget():
     wb.close()
     return budgets
 
+# ─── OBJETIVOS TALENTOS ─────────────────────────────────────────────────────────
+# Código de país (columna B de la planilla) -> nombre interno usado en el dashboard
+PAIS_CODE_MAP = {"AR":"argentina","CL":"chile","CO":"colombia","USA":"usa"}
+
+# Columnas COMERCIAL/ARTISTICO por país en la planilla de objetivos (0-indexed),
+# más el TC a aplicar (None = ya está en USD)
+OBJ_COLS_PAIS = {
+    "argentina": {"comercial":8,  "artistico":9,  "tc":None},
+    "chile":     {"comercial":4,  "artistico":5,  "tc":TC_PRESUP_CLP},
+    "colombia":  {"comercial":12, "artistico":13, "tc":None},
+    "usa":       {"comercial":10, "artistico":11, "tc":None},
+}
+OBJ_COL_INTL = 14        # columna O — Internacional, USD, aplica a todos los talentos
+OBJ_COLS_INTERCOMPANY = [17,18,19,20,21]  # columnas R,S,T,U,V — Venta Regional por país + resto del mundo
+
+def resolver_pais_talento(raw):
+    """Resuelve el código de país crudo de la planilla de objetivos a AR/CL/CO/USA/etc.
+    Reglas confirmadas con Martina:
+    - 'NTW-XX' -> tomar el código después del guion
+    - 'XX-YY' (dos países) -> tomar el primero
+    - '-' o vacío -> sin país (se descarta)
+    """
+    if not raw or not str(raw).strip() or str(raw).strip() == "-":
+        return None
+    raw = str(raw).strip()
+    if raw.upper().startswith("NTW"):
+        partes = raw.split("-")
+        return partes[1].strip() if len(partes) > 1 else None
+    if "-" in raw:
+        return raw.split("-")[0].strip()
+    return raw
+
+def _num(v):
+    try:
+        f = float(v)
+        return f
+    except (TypeError, ValueError):
+        return 0.0
+
+def normalizar_nombre(n):
+    """Normaliza nombres de talento para poder cruzar la planilla de objetivos
+    (en MAYÚSCULAS) con los nombres reales de Odoo (capitalización normal)."""
+    return " ".join((n or "").strip().upper().split())
+
+def load_objetivos_talentos():
+    """Lee la planilla de objetivos por talento y devuelve, por país interno
+    (argentina/chile/colombia/usa), la lista de talentos con sus 4 objetivos en USD:
+    comercial_local, artistico_local, internacional, intercompany."""
+    resultado = {p: [] for p in PAIS_CODE_MAP.values()}
+    if not os.path.exists(OBJETIVOS_FILE):
+        print(f"  ⚠ Archivo de objetivos no encontrado: {OBJETIVOS_FILE}")
+        return resultado
+
+    wb = openpyxl.load_workbook(OBJETIVOS_FILE, read_only=True, data_only=True)
+    ws = wb[wb.sheetnames[0]]
+    rows = list(ws.iter_rows(values_only=True))
+    wb.close()
+
+    for row in rows[3:]:  # las primeras 3 filas son encabezados
+        if not row or not row[0]:
+            continue
+        nombre = str(row[0]).strip()
+        pais_raw = row[1] if len(row) > 1 else None
+        pais_code = resolver_pais_talento(pais_raw)
+        pais = PAIS_CODE_MAP.get(pais_code)
+        if not pais:
+            continue  # país no soportado en la nueva solapa (MX, PE, NUEVO sin país, etc.)
+
+        cfg = OBJ_COLS_PAIS[pais]
+        comercial = _num(row[cfg["comercial"]]) if cfg["comercial"] < len(row) else 0.0
+        artistico = _num(row[cfg["artistico"]]) if cfg["artistico"] < len(row) else 0.0
+        if cfg["tc"]:
+            # Comercial/Artístico de Chile vienen en millones de CLP
+            comercial = comercial * 1_000_000 / cfg["tc"]
+            artistico = artistico * 1_000_000 / cfg["tc"]
+
+        internacional = _num(row[OBJ_COL_INTL]) if OBJ_COL_INTL < len(row) else 0.0
+        intercompany = sum(_num(row[c]) for c in OBJ_COLS_INTERCOMPANY if c < len(row))
+
+        resultado[pais].append({
+            "nombre": nombre,
+            "nombre_norm": normalizar_nombre(nombre),
+            "comercial": comercial,
+            "artistico": artistico,
+            "internacional": internacional,
+            "intercompany": intercompany,
+        })
+    return resultado
+
+TODOS_PAISES_LOCAL = ["argentina","chile","colombia","peru","usa","mexico"]
+
+def compute_reales_talentos(pais, classified, lines):
+    """Para un país (argentina/chile/colombia/usa), calcula el acumulado real de
+    cada talento que aparece en sus ventas locales o internacionales:
+    - comercial: ventas locales del talento en su país, tipo Comercial
+    - artistico: ventas locales del talento en su país, tipo Artístico
+    - internacional: ventas del talento en 'Campañas Internacionales' (cualquier país destino)
+    - intercompany: ventas del talento en el LOCAL de otros países, tipo Regional
+    Devuelve dict {nombre_talento_normalizado: {comercial, artistico, internacional, intercompany}}
+    """
+    reales = defaultdict(lambda: {"comercial":0.0,"artistico":0.0,"internacional":0.0,"intercompany":0.0})
+
+    # Comercial local + Artístico local (ventas locales de ESTE país)
+    for t in classified[pais]['local']:
+        linea = get_linea(t, lines)
+        tal = parse_talento(t.get("name",""), linea)
+        if not tal: continue
+        tal = normalizar_nombre(tal)
+        tipo, _ = pill_tipo(t)
+        amt = get_importe_usd(t, lines)
+        if tipo == "Comercial":
+            reales[tal]["comercial"] += amt
+        elif tipo == "Artístico":
+            reales[tal]["artistico"] += amt
+
+    # Internacional (ventas del talento clasificadas como Campañas Internacionales,
+    # sin importar a qué país se atribuyó por BU)
+    for t in classified['internacional']['intl']:
+        linea = get_linea(t, lines)
+        tal = parse_talento(t.get("name",""), linea)
+        if not tal: continue
+        tal = normalizar_nombre(tal)
+        reales[tal]["internacional"] += get_importe_usd(t, lines)
+
+    # Intercompany (ventas Regionales del talento en el LOCAL de OTROS países)
+    for otro_pais in TODOS_PAISES_LOCAL:
+        if otro_pais == pais: continue
+        for t in classified[otro_pais]['local']:
+            linea = get_linea(t, lines)
+            tal = parse_talento(t.get("name",""), linea)
+            if not tal: continue
+            tal = normalizar_nombre(tal)
+            tipo, _ = pill_tipo(t)
+            if tipo == "Regional":
+                reales[tal]["intercompany"] += get_importe_usd(t, lines)
+
+    return reales
+
 # ─── KPIs ──────────────────────────────────────────────────────────────────────
 def compute_kpis(tasks, lines, mes, anio):
     today = date.today()
@@ -420,6 +559,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',system-ui,sans-ser
 .mtab{padding:14px 24px;cursor:pointer;font-size:14px;font-weight:600;color:var(--tx2);border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s}
 .mtab.local.active{color:var(--a1);border-bottom-color:var(--a1)}
 .mtab.intl.active{color:var(--a2);border-bottom-color:var(--a2)}
+.mtab.objetivos.active{color:var(--a4);border-bottom-color:var(--a4)}
 .mpanel{display:none;padding:24px 28px}.mpanel.active{display:block}
 .sec-label{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:5px 12px;border-radius:20px;margin-bottom:20px}
 .sec-label.local{background:rgba(79,142,247,.1);color:var(--a1);border:1px solid rgba(79,142,247,.25)}
@@ -667,6 +807,68 @@ def build_presupuesto(tasks, lines, budget_pais, mes, anio, tab):
 
     return html + "</div></div>"
 
+def build_objetivos_talentos(pais, anio, classified, lines, objetivos_pais):
+    """Arma la solapa 'Objetivos Talentos': una fila por talento con
+    acumulado real vs objetivo de Comercial, Artístico, Internacional e
+    Intercompany, más cuánto le falta para llegar a cada objetivo."""
+    if not objetivos_pais:
+        return '<p class="note">No hay objetivos de talentos cargados para este país.</p>'
+
+    reales = compute_reales_talentos(pais, classified, lines)
+
+    conceptos = [
+        ("comercial",     "Comercial"),
+        ("artistico",     "Artístico"),
+        ("internacional", "Internacional"),
+        ("intercompany",  "Intercompany"),
+    ]
+
+    filas_html = ""
+    for obj in sorted(objetivos_pais, key=lambda o: -sum(o[k] for k,_ in conceptos)):
+        nombre = obj["nombre"]
+        r = reales.get(obj["nombre_norm"], {"comercial":0.0,"artistico":0.0,"internacional":0.0,"intercompany":0.0})
+
+        bloques = ""
+        for key, label in conceptos:
+            objetivo = obj[key]
+            real = r[key]
+            if not objetivo and not real:
+                # Ni objetivo ni venta real: no aporta nada, se omite
+                continue
+            if not objetivo:
+                # Hay venta real pero no hay objetivo cargado para este concepto
+                bloques += f"""<div class="bgrow">
+  <span class="bgtipo" style="width:100px">{label}</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal warn" style="width:100%"></div></div></div>
+  <div class="bgnums">{fmt_usd(real)} / Sin objetivo</div>
+  <div class="bgpct" style="color:var(--tx3)">—</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Sin objetivo cargado</div>
+</div>"""
+                continue
+            pct = real/objetivo if objetivo else 0
+            falta = max(objetivo - real, 0)
+            bw = min(pct*100, 100)
+            bloques += f"""<div class="bgrow">
+  <span class="bgtipo" style="width:100px">{label}</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal {pct_cls(pct)}" style="width:{bw:.0f}%"></div></div></div>
+  <div class="bgnums">{fmt_usd(real)} / {fmt_usd(objetivo)}</div>
+  <div class="bgpct" style="color:{pct_col(pct)}">{pct:.0%}</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: {fmt_usd(falta) if falta else "✓ Cumplido"}</div>
+</div>"""
+
+        if not bloques:
+            continue
+
+        filas_html += f"""<div class="card" style="margin-bottom:14px">
+  <div class="card-h"><div class="dot" style="background:var(--a1)"></div>{nombre}</div>
+  <div class="card-b">{bloques}</div>
+</div>"""
+
+    if not filas_html:
+        return '<p class="note">No hay objetivos de talentos con datos cargados.</p>'
+
+    return f'<p class="sec-title">Objetivos {anio} por Talento — Acumulado Real vs Objetivo</p>{filas_html}'
+
 def build_pipeline(tasks, lines, mes, anio):
     today = date.today()
     pendientes = [t for t in tasks if not get_fecha_pub(t)]
@@ -854,7 +1056,7 @@ def build_tab(pid, prefix, tab_cls, sec_label, tasks, lines, budget_pais, pais, 
   <div class="spanel" id="{prefix}_acc">{acc_html}</div>
 </div>"""
 
-def generate_html(pais, local_tasks, intl_tasks, lines, budget, mes, anio):
+def generate_html(pais, local_tasks, intl_tasks, lines, budget, mes, anio, classified=None, objetivos=None):
     now_str = datetime.now(timezone.utc).strftime("%d %b %Y · %H:%M hs ARG")
     label   = PAIS_LABEL[pais]
     pid     = f"campanas_{pais}"
@@ -870,6 +1072,21 @@ def generate_html(pais, local_tasks, intl_tasks, lines, budget, mes, anio):
     tab_intl  = build_tab(pid, f"{pid}_I", "intl",
         f"🌐 Ventas Internacionales — {label}",
         intl_tasks, lines, bpais, pais, "intl", mes, anio, False)
+
+    tiene_objetivos = pais in PAIS_CODE_MAP.values() and classified is not None and objetivos is not None
+    mtab_objetivos = ""
+    panel_objetivos = ""
+    if tiene_objetivos:
+        objetivos_pais = objetivos.get(pais, [])
+        obj_html = build_objetivos_talentos(pais, anio, classified, lines, objetivos_pais)
+        mtab_objetivos = f"""  <div class="mtab objetivos" onclick="sw('{pid}','objetivos')">
+    🎯 Objetivos Talentos &nbsp;<span style="opacity:.6;font-weight:400;font-size:12px">{len(objetivos_pais)} talentos</span>
+  </div>
+"""
+        panel_objetivos = f"""<div class="mpanel" id="{pid}_objetivos">
+  <div class="sec-label local">🎯 Objetivos {anio} por Talento — {label}</div>
+  {obj_html}
+</div>"""
 
     return f"""<!DOCTYPE html>
 <html lang="es">
@@ -895,13 +1112,15 @@ def generate_html(pais, local_tasks, intl_tasks, lines, budget, mes, anio):
   <div class="mtab intl" onclick="sw('{pid}','intl')">
     🌐 Internacional &nbsp;<span style="opacity:.6;font-weight:400;font-size:12px">{cnt_i} cont · {fmt_usd(usd_i)}</span>
   </div>
-</div>
+{mtab_objetivos}</div>
 {tab_local}
 {tab_intl}
+{panel_objetivos}
 </div>
 <script>{JS}</script>
 </body>
 </html>"""
+
 
 # ─── MAIN ──────────────────────────────────────────────────────────────────────
 def main():
@@ -922,6 +1141,11 @@ def main():
     print(f"  Cargando presupuesto...")
     budget = load_budget()
 
+    print(f"  Cargando objetivos de talentos...")
+    objetivos = load_objetivos_talentos()
+    for p, lst in objetivos.items():
+        print(f"    {p}: {len(lst)} talentos con objetivo")
+
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     output_map = {"argentina":"argentina.html","chile":"chile.html",
                   "colombia":"colombia.html","usa":"usa.html",
@@ -933,7 +1157,7 @@ def main():
         lt = classified[pais]['local']
         it = classified[pais]['intl']
         print(f"    {pais}: {len(lt)} local / {len(it)} intl")
-        html = generate_html(pais, lt, it, lines, budget, mes, anio)
+        html = generate_html(pais, lt, it, lines, budget, mes, anio, classified, objetivos)
         path = os.path.join(OUTPUT_DIR, fname)
         with open(path, "w", encoding="utf-8") as f:
             f.write(html)
