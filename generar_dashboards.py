@@ -470,19 +470,27 @@ def load_objetivos_talentos():
 
 TODOS_PAISES_LOCAL = ["argentina","chile","colombia","peru","usa","mexico"]
 
-def compute_reales_talentos(pais, classified, lines):
-    """Para un país (argentina/chile/colombia/usa), calcula el acumulado real de
-    cada talento que aparece en sus ventas locales o internacionales:
+def compute_reales_talentos(pais, classified, lines, anio):
+    """Para un país (argentina/chile/colombia/usa), calcula el acumulado real
+    del año `anio` de cada talento que aparece en sus ventas locales o
+    internacionales:
     - comercial: ventas locales del talento en su país, tipo Comercial
     - artistico: ventas locales del talento en su país, tipo Artístico
     - internacional: ventas del talento en 'Campañas Internacionales' (cualquier país destino)
     - intercompany: ventas del talento en el LOCAL de otros países, tipo Regional
+    Solo cuenta tareas con fecha de publicación dentro de `anio`, ya que los
+    objetivos de la planilla son anuales.
     Devuelve dict {nombre_talento_normalizado: {comercial, artistico, internacional, intercompany}}
     """
     reales = defaultdict(lambda: {"comercial":0.0,"artistico":0.0,"internacional":0.0,"intercompany":0.0})
 
+    def es_del_anio(t):
+        fpub = get_fecha_pub(t)
+        return fpub is not None and fpub.year == anio
+
     # Comercial local + Artístico local (ventas locales de ESTE país)
     for t in classified[pais]['local']:
+        if not es_del_anio(t): continue
         linea = get_linea(t, lines)
         tal = parse_talento(t.get("name",""), linea)
         if not tal: continue
@@ -497,6 +505,7 @@ def compute_reales_talentos(pais, classified, lines):
     # Internacional (ventas del talento clasificadas como Campañas Internacionales,
     # sin importar a qué país se atribuyó por BU)
     for t in classified['internacional']['intl']:
+        if not es_del_anio(t): continue
         linea = get_linea(t, lines)
         tal = parse_talento(t.get("name",""), linea)
         if not tal: continue
@@ -507,6 +516,7 @@ def compute_reales_talentos(pais, classified, lines):
     for otro_pais in TODOS_PAISES_LOCAL:
         if otro_pais == pais: continue
         for t in classified[otro_pais]['local']:
+            if not es_del_anio(t): continue
             linea = get_linea(t, lines)
             tal = parse_talento(t.get("name",""), linea)
             if not tal: continue
@@ -887,7 +897,7 @@ def build_objetivos_talentos(pais, anio, classified, lines, objetivos_pais):
     if not objetivos_pais:
         return '<p class="note">No hay objetivos de talentos cargados para este país.</p>'
 
-    reales = compute_reales_talentos(pais, classified, lines)
+    reales = compute_reales_talentos(pais, classified, lines, anio)
 
     conceptos = [
         ("total",         "Total"),
