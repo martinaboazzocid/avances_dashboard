@@ -43,7 +43,7 @@ def get_mep():
     return 1450.0
 
 TC_ARS = get_mep()
-TC = {'ARS': TC_ARS, 'CLP':940, 'COP':4250, 'PEN':3.72, 'USD':1, 'MXN':17}
+TC = {'ARS': TC_ARS, 'CLP':940, 'COP':4250, 'PEN':3.72, 'USD':1, 'MXN':17, 'UYU':40, 'BRL':5.5, 'PYG':7500}
 TC_PRESUP_CLP = 890
 
 # ─── CAMPOS A DESCARGAR ────────────────────────────────────────────────────────
@@ -232,9 +232,20 @@ def fmt_usd(v):
     if abs(v) >= 1_000:     return f"USD {v/1_000:.1f}K"
     return f"USD {v:,.0f}"
 
+_MONEDAS_DESCONOCIDAS_AVISADAS = set()
+
 def to_usd(amt, cur):
     if not amt: return 0.0
-    return float(amt) / TC.get((cur or 'USD').upper(), 1)
+    cur_code = (cur or 'USD').upper()
+    if cur_code not in TC:
+        # Moneda no mapeada: NO asumir USD 1:1 (eso fue el bug con UYU/Marcos
+        # Ducuing, que infló su venta 40x). Se descarta y se avisa en el log
+        # para que se pueda agregar el TC correcto a la tabla TC de arriba.
+        if cur_code not in _MONEDAS_DESCONOCIDAS_AVISADAS:
+            print(f"  ⚠ Moneda desconocida '{cur_code}' — venta DESCARTADA de la conversión a USD. Agregar su TC en el diccionario TC.")
+            _MONEDAS_DESCONOCIDAS_AVISADAS.add(cur_code)
+        return 0.0
+    return float(amt) / TC[cur_code]
 
 def parse_date(s):
     if not s or s is False: return None
