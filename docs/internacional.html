@@ -19,6 +19,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',system-ui,sans-ser
 .mtab{padding:14px 24px;cursor:pointer;font-size:14px;font-weight:600;color:var(--tx2);border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s}
 .mtab.local.active{color:var(--a1);border-bottom-color:var(--a1)}
 .mtab.intl.active{color:var(--a2);border-bottom-color:var(--a2)}
+.mtab.objetivos.active{color:var(--a4);border-bottom-color:var(--a4)}
 .mpanel{display:none;padding:24px 28px}.mpanel.active{display:block}
 .sec-label{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:5px 12px;border-radius:20px;margin-bottom:20px}
 .sec-label.local{background:rgba(79,142,247,.1);color:var(--a1);border:1px solid rgba(79,142,247,.25)}
@@ -42,6 +43,10 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',system-ui,sans-ser
 .card-h-note{font-size:10px;color:var(--tx3);font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px}
 .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .card-b{padding:14px 16px}.note{font-size:11.5px;color:var(--tx3);padding:6px 0}
+.obj-card summary::-webkit-details-marker{display:none}
+.obj-card summary::marker{content:""}
+.obj-card summary:hover{background:rgba(255,255,255,.02)}
+.obj-card[open] summary{border-bottom:1px solid var(--bdr)}
 .tw{overflow-x:auto}
 table{width:100%;border-collapse:collapse}
 th{text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--tx3);padding:6px 9px;border-bottom:1px solid var(--bdr)}
@@ -95,7 +100,7 @@ tr:hover td{background:rgba(79,142,247,.04)}
   <div class="hdr-logo">ZAS</div><div class="hdr-sep">/</div>
   <div class="hdr-title">Dashboard de Implementaciones</div>
   <div class="hdr-badge">Campañas Internacionales</div>
-  <div class="hdr-date">01 Jul 2026 · 17:12 hs ARG</div>
+  <div class="hdr-date">01 Jul 2026 · 18:37 hs ARG</div>
 </div>
 <div id="pg_campanas_internacional">
 <div class="mtabs">
@@ -108,7 +113,7 @@ tr:hover td{background:rgba(79,142,247,.04)}
 </div>
 
 <div class="mpanel active" id="campanas_internacional_local">
-  <div class="fxnote">💱 <strong>Todos los importes en USD.</strong> TC MEP: 1523 ARS/USD · BCCh 940 CLP/USD · BanRep ~4.250 COP/USD · BCRP ~3.72 PEN/USD</div>
+  <div class="fxnote">💱 <strong>Todos los importes en USD.</strong> TC MEP: 1526 ARS/USD · BCCh 940 CLP/USD · BanRep ~4.250 COP/USD · BCRP ~3.72 PEN/USD</div>
   <div class="sec-label local">🏠 Ventas Locales — Campañas Internacionales</div>
   <div class="stabs" id="campanas_internacional_L_nav">
     <div class="stab active" onclick="sst('campanas_internacional_L','impl')">📊 Implementado</div>
@@ -152,7 +157,7 @@ tr:hover td{background:rgba(79,142,247,.04)}
 </div>
 
 <div class="mpanel " id="campanas_internacional_intl">
-  <div class="fxnote">💱 <strong>Todos los importes en USD.</strong> TC MEP: 1523 ARS/USD · BCCh 940 CLP/USD · BanRep ~4.250 COP/USD · BCRP ~3.72 PEN/USD</div>
+  <div class="fxnote">💱 <strong>Todos los importes en USD.</strong> TC MEP: 1526 ARS/USD · BCCh 940 CLP/USD · BanRep ~4.250 COP/USD · BCRP ~3.72 PEN/USD</div>
   <div class="sec-label intl">🌐 Ventas Internacionales — Campañas Internacionales</div>
   <div class="stabs" id="campanas_internacional_I_nav">
     <div class="stab active" onclick="sst('campanas_internacional_I','impl')">📊 Implementado</div>
@@ -194,6 +199,7 @@ tr:hover td{background:rgba(79,142,247,.04)}
   <div class="card-b"><div class="tw"><table><thead><tr><th>Cliente</th><th class="r">Cont.</th><th class="r">USD acum.</th></tr></thead><tbody><tr><td>Digify International Limited</td><td class="r">372</td><td class="r">USD 263.8K</td></tr><tr><td>Beautyselection Co., Ltd</td><td class="r">19</td><td class="r">USD 65.0K</td></tr><tr><td>WILD FI URUGUAY S.A</td><td class="r">3</td><td class="r">USD 62.0K</td></tr><tr><td>STAR SPEEDY GROWTH HK LIMITED</td><td class="r">29</td><td class="r">USD 56.0K</td></tr><tr><td>INFLUUR</td><td class="r">61</td><td class="r">USD 42.2K</td></tr><tr><td>GOLDFISH AGENCY SOCIEDAD ANONIMA CERRADA - GOLDFISH AGENCY S.A.C.</td><td class="r">23</td><td class="r">USD 40.9K</td></tr><tr><td>MAZALAN</td><td class="r">24</td><td class="r">USD 36.5K</td></tr><tr><td>SESEEKEEHORIZON TECHNOLOGY (HK) CO.,LIMITED</td><td class="r">34</td><td class="r">USD 35.0K</td></tr><tr><td>Ventura International Ltd</td><td class="r">8</td><td class="r">USD 33.3K</td></tr><tr><td>FRAGANCIAS MATCH</td><td class="r">3</td><td class="r">USD 30.0K</td></tr><tr><td>PLAYHILL LIMITED</td><td class="r">28</td><td class="r">USD 26.8K</td></tr><tr><td>SKIN1004</td><td class="r">5</td><td class="r">USD 26.0K</td></tr><tr><td>PETER CAMPBELL S.A.S.</td><td class="r">14</td><td class="r">USD 22.6K</td></tr><tr><td>BELCORP</td><td class="r">10</td><td class="r">USD 22.0K</td></tr><tr><td>YESSTYLE</td><td class="r">4</td><td class="r">USD 21.0K</td></tr></tbody></table></div></div></div></div>
   <div class="spanel" id="campanas_internacional_I_acc"><div class="acc"><div class="ai ai-urgente"><span class="aico">🚨</span><div><div class="albl">Urgente</div><div class="atxt">[Intl] 58 campaña(s) vencida(s). Mayor urgencia: TIKTOK — USD 1.3K · 247d de atraso.</div></div></div><div class="ai ai-operativo"><span class="aico">🔧</span><div><div class="albl">Operativo</div><div class="atxt">[Intl] 9 subtareas sin fecha estimada. Asignar fechas para mejorar planificación.</div></div></div><div class="ai ai-riesgo"><span class="aico">⏱</span><div><div class="albl">Riesgo Operativo</div><div class="atxt">[Intl] Velocidad de cierre: 42 días promedio.</div></div></div><div class="ai ai-alerta"><span class="aico">📉</span><div><div class="albl">Alerta Implementación</div><div class="atxt">[Intl] Tasa: 0%. Solo 0 de 81 campañas publicadas.</div></div></div></div></div>
 </div>
+
 </div>
 <script>
 function sw(pid,tab){
@@ -216,6 +222,33 @@ function sst(prefix,tab){
   if(trig)trig.classList.add('active');
   var sp=document.getElementById(prefix+'_'+tab);
   if(sp)sp.classList.add('active');
+}
+function filtrarTalentos(inputId){
+  var input=document.getElementById(inputId);
+  var tabla=document.getElementById(inputId+'_list');
+  if(!input||!tabla)return;
+  var q=input.value.trim().toUpperCase();
+  tabla.querySelectorAll('.obj-row').forEach(function(row){
+    var nombre=row.getAttribute('data-nombre')||'';
+    var visible = nombre.indexOf(q)!==-1;
+    row.style.display = visible ? '' : 'none';
+    var det=document.getElementById(row.getAttribute('data-rid'));
+    if(det && !visible) det.style.display='none';
+  });
+}
+function filtrarCategoria(inputId){
+  var sel=document.getElementById(inputId+'_cat');
+  var tabla=document.getElementById(inputId+'_list');
+  if(!sel||!tabla)return;
+  var vista=sel.value;
+  tabla.querySelectorAll('.obj-vista').forEach(function(sp){
+    sp.style.display = sp.getAttribute('data-vista')===vista ? '' : 'none';
+  });
+}
+function toggleObjDetalle(rid){
+  var det=document.getElementById(rid);
+  if(!det)return;
+  det.style.display = det.style.display==='none' ? '' : 'none';
 }</script>
 </body>
 </html>

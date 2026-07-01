@@ -19,6 +19,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',system-ui,sans-ser
 .mtab{padding:14px 24px;cursor:pointer;font-size:14px;font-weight:600;color:var(--tx2);border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s}
 .mtab.local.active{color:var(--a1);border-bottom-color:var(--a1)}
 .mtab.intl.active{color:var(--a2);border-bottom-color:var(--a2)}
+.mtab.objetivos.active{color:var(--a4);border-bottom-color:var(--a4)}
 .mpanel{display:none;padding:24px 28px}.mpanel.active{display:block}
 .sec-label{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:5px 12px;border-radius:20px;margin-bottom:20px}
 .sec-label.local{background:rgba(79,142,247,.1);color:var(--a1);border:1px solid rgba(79,142,247,.25)}
@@ -42,6 +43,10 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',system-ui,sans-ser
 .card-h-note{font-size:10px;color:var(--tx3);font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px}
 .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .card-b{padding:14px 16px}.note{font-size:11.5px;color:var(--tx3);padding:6px 0}
+.obj-card summary::-webkit-details-marker{display:none}
+.obj-card summary::marker{content:""}
+.obj-card summary:hover{background:rgba(255,255,255,.02)}
+.obj-card[open] summary{border-bottom:1px solid var(--bdr)}
 .tw{overflow-x:auto}
 table{width:100%;border-collapse:collapse}
 th{text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--tx3);padding:6px 9px;border-bottom:1px solid var(--bdr)}
@@ -95,7 +100,7 @@ tr:hover td{background:rgba(79,142,247,.04)}
   <div class="hdr-logo">ZAS</div><div class="hdr-sep">/</div>
   <div class="hdr-title">Dashboard de Implementaciones</div>
   <div class="hdr-badge">Campañas Colombianas</div>
-  <div class="hdr-date">01 Jul 2026 · 17:12 hs ARG</div>
+  <div class="hdr-date">01 Jul 2026 · 18:37 hs ARG</div>
 </div>
 <div id="pg_campanas_colombia">
 <div class="mtabs">
@@ -105,10 +110,13 @@ tr:hover td{background:rgba(79,142,247,.04)}
   <div class="mtab intl" onclick="sw('campanas_colombia','intl')">
     🌐 Internacional &nbsp;<span style="opacity:.6;font-weight:400;font-size:12px">104 cont · USD 67.5K</span>
   </div>
+  <div class="mtab objetivos" onclick="sw('campanas_colombia','objetivos')">
+    🎯 Objetivos Talentos &nbsp;<span style="opacity:.6;font-weight:400;font-size:12px">30 talentos</span>
+  </div>
 </div>
 
 <div class="mpanel active" id="campanas_colombia_local">
-  <div class="fxnote">💱 <strong>Todos los importes en USD.</strong> TC MEP: 1523 ARS/USD · BCCh 940 CLP/USD · BanRep ~4.250 COP/USD · BCRP ~3.72 PEN/USD</div>
+  <div class="fxnote">💱 <strong>Todos los importes en USD.</strong> TC MEP: 1526 ARS/USD · BCCh 940 CLP/USD · BanRep ~4.250 COP/USD · BCRP ~3.72 PEN/USD</div>
   <div class="sec-label local">🏠 Ventas Locales — Campañas Colombianas</div>
   <div class="stabs" id="campanas_colombia_L_nav">
     <div class="stab active" onclick="sst('campanas_colombia_L','impl')">📊 Implementado</div>
@@ -204,7 +212,7 @@ tr:hover td{background:rgba(79,142,247,.04)}
 </div>
 
 <div class="mpanel " id="campanas_colombia_intl">
-  <div class="fxnote">💱 <strong>Todos los importes en USD.</strong> TC MEP: 1523 ARS/USD · BCCh 940 CLP/USD · BanRep ~4.250 COP/USD · BCRP ~3.72 PEN/USD</div>
+  <div class="fxnote">💱 <strong>Todos los importes en USD.</strong> TC MEP: 1526 ARS/USD · BCCh 940 CLP/USD · BanRep ~4.250 COP/USD · BCRP ~3.72 PEN/USD</div>
   <div class="sec-label intl">🌐 Ventas Internacionales — Campañas Colombianas</div>
   <div class="stabs" id="campanas_colombia_I_nav">
     <div class="stab active" onclick="sst('campanas_colombia_I','impl')">📊 Implementado</div>
@@ -259,6 +267,715 @@ tr:hover td{background:rgba(79,142,247,.04)}
   <div class="card-b"><div class="tw"><table><thead><tr><th>Cliente</th><th class="r">Cont.</th><th class="r">USD acum.</th></tr></thead><tbody><tr><td>PETER CAMPBELL S.A.S.</td><td class="r">14</td><td class="r">USD 22.6K</td></tr><tr><td>MAZALAN</td><td class="r">8</td><td class="r">USD 16.1K</td></tr><tr><td>GRAPA DIGITAL LTDA</td><td class="r">18</td><td class="r">USD 11.0K</td></tr><tr><td>The Crazy Entrepreneur Marketing Services LLC</td><td class="r">30</td><td class="r">USD 6.6K</td></tr><tr><td>ANSVERY AGENCY</td><td class="r">1</td><td class="r">USD 1.9K</td></tr><tr><td>INFLUUR</td><td class="r">6</td><td class="r">USD 1.8K</td></tr><tr><td>Netshield Limited</td><td class="r">1</td><td class="r">USD 1.4K</td></tr><tr><td>SONAR PR</td><td class="r">3</td><td class="r">USD 1.3K</td></tr><tr><td>LUXY</td><td class="r">2</td><td class="r">USD 1.2K</td></tr><tr><td>TYPELESS</td><td class="r">6</td><td class="r">USD 1.1K</td></tr><tr><td>GLOBAL81 SPA</td><td class="r">2</td><td class="r">USD 1.0K</td></tr><tr><td>TUMANAG3R, INFLUENCERS MANAGEMENT AGENCY, S.L.U.</td><td class="r">4</td><td class="r">USD 1.0K</td></tr><tr><td>MEDIA MZ</td><td class="r">3</td><td class="r">USD 600</td></tr></tbody></table></div></div></div></div>
   <div class="spanel" id="campanas_colombia_I_acc"><div class="acc"><div class="ai ai-urgente"><span class="aico">🚨</span><div><div class="albl">Urgente</div><div class="atxt">[Intl] 6 campaña(s) vencida(s). Mayor urgencia: Reel 4 — USD 180 · 35d de atraso.</div></div></div></div></div>
 </div>
+<div class="mpanel" id="campanas_colombia_objetivos">
+  <div class="sec-label local">🎯 Objetivos 2026 por Talento — Campañas Colombianas</div>
+  <p class="sec-title">Objetivos 2026 por Talento — Acumulado Real vs Objetivo</p><div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;align-items:center">
+  <input type="text" id="objbuscar_colombia" placeholder="🔎 Buscar talento..." autocomplete="off"
+    oninput="filtrarTalentos('objbuscar_colombia')"
+    style="flex:1;min-width:200px;max-width:320px;padding:8px 12px;border-radius:8px;border:1px solid var(--bdr);background:var(--s1);color:var(--tx1);font-size:13px;font-family:inherit">
+  <select id="objbuscar_colombia_cat" onchange="filtrarCategoria('objbuscar_colombia')"
+    style="padding:8px 12px;border-radius:8px;border:1px solid var(--bdr);background:var(--s1);color:var(--tx1);font-size:13px;font-family:inherit">
+    <option value="total">Total</option>
+    <option value="comercial">Comercial</option>
+    <option value="artistico">Artístico</option>
+    <option value="internacional">Internacional</option>
+    <option value="intercompany">Intercompany</option>
+  </select>
+</div><div class="tw"><table id="objbuscar_colombia_list">
+<thead><tr><th>Talento</th><th class="r">Real</th><th class="r">Objetivo</th><th class="r">%</th><th class="r">Falta</th></tr></thead>
+<tbody><tr class="obj-row" data-nombre="LAURA RODRIGUEZ" data-rid="objrow_colombia_1" onclick="toggleObjDetalle('objrow_colombia_1')" style="cursor:pointer">
+  <td style="font-weight:600">LAURA RODRIGUEZ</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 52.3K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 42.5K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 5.8K</span><span class="obj-vista" data-vista="intercompany" style="display:none">USD 4.0K</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 61.8K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 56.8K</span><span class="obj-vista" data-vista="artistico" style="display:none">Sin objetivo</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 5.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--yellow);">85%</span><span class="obj-vista" data-vista="comercial" style="color:var(--yellow);display:none">75%</span><span class="obj-vista" data-vista="artistico" style="color:var(--tx3);display:none">—</span><span class="obj-vista" data-vista="internacional" style="color:var(--a5);display:none">116%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 9.5K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 14.3K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">✓ Cumplido</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo cargado</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_1" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal warn" style="width:75%"></div></div></div>
+  <div class="bgnums">USD 42.5K / USD 56.8K</div>
+  <div class="bgpct" style="color:var(--yellow)">75%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 14.3K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal over" style="width:100%"></div></div></div>
+  <div class="bgnums">USD 5.8K / USD 5.0K</div>
+  <div class="bgpct" style="color:var(--a5)">116%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: ✓ Cumplido</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Intercompany</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal warn" style="width:100%"></div></div></div>
+  <div class="bgnums">USD 4.0K / Sin objetivo</div>
+  <div class="bgpct" style="color:var(--tx3)">—</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Sin objetivo cargado</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="LINCOLN PALOMEQUE" data-rid="objrow_colombia_2" onclick="toggleObjDetalle('objrow_colombia_2')" style="cursor:pointer">
+  <td style="font-weight:600">LINCOLN PALOMEQUE</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">—</span><span class="obj-vista" data-vista="comercial" style="display:none">—</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">—</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 61.8K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 56.8K</span><span class="obj-vista" data-vista="artistico" style="display:none">Sin objetivo</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 5.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--red);">0%</span><span class="obj-vista" data-vista="comercial" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="artistico" style="color:var(--tx3);display:none">—</span><span class="obj-vista" data-vista="internacional" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 61.8K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 56.8K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 5.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_2" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 56.8K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 56.8K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 5.0K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 5.0K</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="EXTERNOS" data-rid="objrow_colombia_3" onclick="toggleObjDetalle('objrow_colombia_3')" style="cursor:pointer">
+  <td style="font-weight:600">EXTERNOS</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 46.7K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 30.7K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 16.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 60.0K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 60.0K</span><span class="obj-vista" data-vista="artistico" style="display:none">Sin objetivo</span><span class="obj-vista" data-vista="internacional" style="display:none">Sin objetivo</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--yellow);">78%</span><span class="obj-vista" data-vista="comercial" style="color:var(--red);display:none">51%</span><span class="obj-vista" data-vista="artistico" style="color:var(--tx3);display:none">—</span><span class="obj-vista" data-vista="internacional" style="color:var(--tx3);display:none">—</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 13.3K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 29.3K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">Sin objetivo cargado</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_3" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:51%"></div></div></div>
+  <div class="bgnums">USD 30.7K / USD 60.0K</div>
+  <div class="bgpct" style="color:var(--red)">51%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 29.3K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal warn" style="width:100%"></div></div></div>
+  <div class="bgnums">USD 16.0K / Sin objetivo</div>
+  <div class="bgpct" style="color:var(--tx3)">—</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Sin objetivo cargado</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="NUEVO" data-rid="objrow_colombia_4" onclick="toggleObjDetalle('objrow_colombia_4')" style="cursor:pointer">
+  <td style="font-weight:600">NUEVO</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">—</span><span class="obj-vista" data-vista="comercial" style="display:none">—</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">—</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 33.2K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 26.8K</span><span class="obj-vista" data-vista="artistico" style="display:none">USD -3.6K</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 9.9K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--red);">0%</span><span class="obj-vista" data-vista="comercial" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="artistico" style="color:var(--red);display:none">-0%</span><span class="obj-vista" data-vista="internacional" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 33.2K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 26.8K</span><span class="obj-vista" data-vista="artistico" style="display:none">✓ Cumplido</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 9.9K</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_4" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 26.8K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 26.8K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Artístico</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:-0%"></div></div></div>
+  <div class="bgnums">— / USD -3.6K</div>
+  <div class="bgpct" style="color:var(--red)">-0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: ✓ Cumplido</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 9.9K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 9.9K</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="CAMILO MAYA" data-rid="objrow_colombia_5" onclick="toggleObjDetalle('objrow_colombia_5')" style="cursor:pointer">
+  <td style="font-weight:600">CAMILO MAYA</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 9.1K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 2.4K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 6.7K</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 21.9K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 9.5K</span><span class="obj-vista" data-vista="artistico" style="display:none">USD 7.9K</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 4.5K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--red);">41%</span><span class="obj-vista" data-vista="comercial" style="color:var(--red);display:none">25%</span><span class="obj-vista" data-vista="artistico" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="internacional" style="color:var(--a5);display:none">149%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 12.8K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 7.1K</span><span class="obj-vista" data-vista="artistico" style="display:none">USD 7.9K</span><span class="obj-vista" data-vista="internacional" style="display:none">✓ Cumplido</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_5" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:25%"></div></div></div>
+  <div class="bgnums">USD 2.4K / USD 9.5K</div>
+  <div class="bgpct" style="color:var(--red)">25%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 7.1K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Artístico</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 7.9K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 7.9K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal over" style="width:100%"></div></div></div>
+  <div class="bgnums">USD 6.7K / USD 4.5K</div>
+  <div class="bgpct" style="color:var(--a5)">149%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: ✓ Cumplido</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="MICHELL ORZCO" data-rid="objrow_colombia_6" onclick="toggleObjDetalle('objrow_colombia_6')" style="cursor:pointer">
+  <td style="font-weight:600">MICHELL ORZCO</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">—</span><span class="obj-vista" data-vista="comercial" style="display:none">—</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">—</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 20.2K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 15.2K</span><span class="obj-vista" data-vista="artistico" style="display:none">Sin objetivo</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 5.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--red);">0%</span><span class="obj-vista" data-vista="comercial" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="artistico" style="color:var(--tx3);display:none">—</span><span class="obj-vista" data-vista="internacional" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 20.2K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 15.2K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 5.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_6" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 15.2K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 15.2K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 5.0K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 5.0K</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="DANI Y CAMI" data-rid="objrow_colombia_7" onclick="toggleObjDetalle('objrow_colombia_7')" style="cursor:pointer">
+  <td style="font-weight:600">DANI Y CAMI</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 11.3K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 10.4K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 863</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 19.8K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 15.8K</span><span class="obj-vista" data-vista="artistico" style="display:none">Sin objetivo</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 4.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--red);">57%</span><span class="obj-vista" data-vista="comercial" style="color:var(--yellow);display:none">66%</span><span class="obj-vista" data-vista="artistico" style="color:var(--tx3);display:none">—</span><span class="obj-vista" data-vista="internacional" style="color:var(--red);display:none">22%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 8.5K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 5.4K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.1K</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_7" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal warn" style="width:66%"></div></div></div>
+  <div class="bgnums">USD 10.4K / USD 15.8K</div>
+  <div class="bgpct" style="color:var(--yellow)">66%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 5.4K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:22%"></div></div></div>
+  <div class="bgnums">USD 863 / USD 4.0K</div>
+  <div class="bgpct" style="color:var(--red)">22%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 3.1K</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="FATME DEIRANI" data-rid="objrow_colombia_8" onclick="toggleObjDetalle('objrow_colombia_8')" style="cursor:pointer">
+  <td style="font-weight:600">FATME DEIRANI</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">—</span><span class="obj-vista" data-vista="comercial" style="display:none">—</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">—</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 16.3K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 10.7K</span><span class="obj-vista" data-vista="artistico" style="display:none">USD 1.6K</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 4.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--red);">0%</span><span class="obj-vista" data-vista="comercial" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="artistico" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="internacional" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 16.3K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 10.7K</span><span class="obj-vista" data-vista="artistico" style="display:none">USD 1.6K</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 4.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_8" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 10.7K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 10.7K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Artístico</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 1.6K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 1.6K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 4.0K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 4.0K</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="ESTEFANIA GAVIRIA" data-rid="objrow_colombia_9" onclick="toggleObjDetalle('objrow_colombia_9')" style="cursor:pointer">
+  <td style="font-weight:600">ESTEFANIA GAVIRIA</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">—</span><span class="obj-vista" data-vista="comercial" style="display:none">—</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">—</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 15.9K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">USD 2.0K</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 1.3K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--red);">0%</span><span class="obj-vista" data-vista="comercial" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="artistico" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="internacional" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 15.9K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">USD 2.0K</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 1.3K</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_9" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 12.6K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 12.6K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Artístico</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 2.0K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 2.0K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 1.3K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 1.3K</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="NUEVO" data-rid="objrow_colombia_10" onclick="toggleObjDetalle('objrow_colombia_10')" style="cursor:pointer">
+  <td style="font-weight:600">NUEVO</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">—</span><span class="obj-vista" data-vista="comercial" style="display:none">—</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">—</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 15.6K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">Sin objetivo</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--red);">0%</span><span class="obj-vista" data-vista="comercial" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="artistico" style="color:var(--tx3);display:none">—</span><span class="obj-vista" data-vista="internacional" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 15.6K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_10" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 12.6K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 12.6K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 3.0K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 3.0K</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="NUEVO" data-rid="objrow_colombia_11" onclick="toggleObjDetalle('objrow_colombia_11')" style="cursor:pointer">
+  <td style="font-weight:600">NUEVO</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">—</span><span class="obj-vista" data-vista="comercial" style="display:none">—</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">—</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 15.6K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">Sin objetivo</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--red);">0%</span><span class="obj-vista" data-vista="comercial" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="artistico" style="color:var(--tx3);display:none">—</span><span class="obj-vista" data-vista="internacional" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 15.6K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_11" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 12.6K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 12.6K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 3.0K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 3.0K</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="NUEVO" data-rid="objrow_colombia_12" onclick="toggleObjDetalle('objrow_colombia_12')" style="cursor:pointer">
+  <td style="font-weight:600">NUEVO</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">—</span><span class="obj-vista" data-vista="comercial" style="display:none">—</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">—</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 15.6K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">Sin objetivo</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--red);">0%</span><span class="obj-vista" data-vista="comercial" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="artistico" style="color:var(--tx3);display:none">—</span><span class="obj-vista" data-vista="internacional" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 15.6K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_12" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 12.6K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 12.6K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 3.0K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 3.0K</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="NUEVO" data-rid="objrow_colombia_13" onclick="toggleObjDetalle('objrow_colombia_13')" style="cursor:pointer">
+  <td style="font-weight:600">NUEVO</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">—</span><span class="obj-vista" data-vista="comercial" style="display:none">—</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">—</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 15.6K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">Sin objetivo</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--red);">0%</span><span class="obj-vista" data-vista="comercial" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="artistico" style="color:var(--tx3);display:none">—</span><span class="obj-vista" data-vista="internacional" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 15.6K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_13" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 12.6K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 12.6K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 3.0K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 3.0K</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="NUEVO" data-rid="objrow_colombia_14" onclick="toggleObjDetalle('objrow_colombia_14')" style="cursor:pointer">
+  <td style="font-weight:600">NUEVO</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">—</span><span class="obj-vista" data-vista="comercial" style="display:none">—</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">—</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 15.6K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">Sin objetivo</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--red);">0%</span><span class="obj-vista" data-vista="comercial" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="artistico" style="color:var(--tx3);display:none">—</span><span class="obj-vista" data-vista="internacional" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 15.6K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_14" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 12.6K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 12.6K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 3.0K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 3.0K</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="NUEVO" data-rid="objrow_colombia_15" onclick="toggleObjDetalle('objrow_colombia_15')" style="cursor:pointer">
+  <td style="font-weight:600">NUEVO</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">—</span><span class="obj-vista" data-vista="comercial" style="display:none">—</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">—</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 15.6K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">Sin objetivo</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--red);">0%</span><span class="obj-vista" data-vista="comercial" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="artistico" style="color:var(--tx3);display:none">—</span><span class="obj-vista" data-vista="internacional" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 15.6K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_15" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 12.6K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 12.6K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 3.0K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 3.0K</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="NUEVO" data-rid="objrow_colombia_16" onclick="toggleObjDetalle('objrow_colombia_16')" style="cursor:pointer">
+  <td style="font-weight:600">NUEVO</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">—</span><span class="obj-vista" data-vista="comercial" style="display:none">—</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">—</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 15.6K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">Sin objetivo</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--red);">0%</span><span class="obj-vista" data-vista="comercial" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="artistico" style="color:var(--tx3);display:none">—</span><span class="obj-vista" data-vista="internacional" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 15.6K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_16" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 12.6K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 12.6K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 3.0K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 3.0K</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="NUEVO" data-rid="objrow_colombia_17" onclick="toggleObjDetalle('objrow_colombia_17')" style="cursor:pointer">
+  <td style="font-weight:600">NUEVO</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">—</span><span class="obj-vista" data-vista="comercial" style="display:none">—</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">—</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 15.6K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">Sin objetivo</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--red);">0%</span><span class="obj-vista" data-vista="comercial" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="artistico" style="color:var(--tx3);display:none">—</span><span class="obj-vista" data-vista="internacional" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 15.6K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_17" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 12.6K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 12.6K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 3.0K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 3.0K</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="NUEVO" data-rid="objrow_colombia_18" onclick="toggleObjDetalle('objrow_colombia_18')" style="cursor:pointer">
+  <td style="font-weight:600">NUEVO</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">—</span><span class="obj-vista" data-vista="comercial" style="display:none">—</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">—</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 15.6K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">Sin objetivo</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--red);">0%</span><span class="obj-vista" data-vista="comercial" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="artistico" style="color:var(--tx3);display:none">—</span><span class="obj-vista" data-vista="internacional" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 15.6K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_18" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 12.6K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 12.6K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 3.0K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 3.0K</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="NUEVO" data-rid="objrow_colombia_19" onclick="toggleObjDetalle('objrow_colombia_19')" style="cursor:pointer">
+  <td style="font-weight:600">NUEVO</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">—</span><span class="obj-vista" data-vista="comercial" style="display:none">—</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">—</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 15.6K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">Sin objetivo</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--red);">0%</span><span class="obj-vista" data-vista="comercial" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="artistico" style="color:var(--tx3);display:none">—</span><span class="obj-vista" data-vista="internacional" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 15.6K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_19" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 12.6K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 12.6K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 3.0K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 3.0K</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="NUEVO" data-rid="objrow_colombia_20" onclick="toggleObjDetalle('objrow_colombia_20')" style="cursor:pointer">
+  <td style="font-weight:600">NUEVO</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">—</span><span class="obj-vista" data-vista="comercial" style="display:none">—</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">—</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 15.6K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">Sin objetivo</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--red);">0%</span><span class="obj-vista" data-vista="comercial" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="artistico" style="color:var(--tx3);display:none">—</span><span class="obj-vista" data-vista="internacional" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 15.6K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_20" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 12.6K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 12.6K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 3.0K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 3.0K</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="NUEVO" data-rid="objrow_colombia_21" onclick="toggleObjDetalle('objrow_colombia_21')" style="cursor:pointer">
+  <td style="font-weight:600">NUEVO</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">—</span><span class="obj-vista" data-vista="comercial" style="display:none">—</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">—</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 15.6K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">Sin objetivo</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--red);">0%</span><span class="obj-vista" data-vista="comercial" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="artistico" style="color:var(--tx3);display:none">—</span><span class="obj-vista" data-vista="internacional" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 15.6K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_21" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 12.6K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 12.6K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 3.0K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 3.0K</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="IRIS" data-rid="objrow_colombia_22" onclick="toggleObjDetalle('objrow_colombia_22')" style="cursor:pointer">
+  <td style="font-weight:600">IRIS</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 7.2K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 4.5K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 500</span><span class="obj-vista" data-vista="intercompany" style="display:none">USD 2.2K</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 15.5K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">USD 1.6K</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 1.3K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--red);">46%</span><span class="obj-vista" data-vista="comercial" style="color:var(--red);display:none">36%</span><span class="obj-vista" data-vista="artistico" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="internacional" style="color:var(--red);display:none">39%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 8.3K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 8.1K</span><span class="obj-vista" data-vista="artistico" style="display:none">USD 1.6K</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 772</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo cargado</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_22" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:36%"></div></div></div>
+  <div class="bgnums">USD 4.5K / USD 12.6K</div>
+  <div class="bgpct" style="color:var(--red)">36%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 8.1K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Artístico</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 1.6K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 1.6K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:39%"></div></div></div>
+  <div class="bgnums">USD 500 / USD 1.3K</div>
+  <div class="bgpct" style="color:var(--red)">39%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 772</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Intercompany</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal warn" style="width:100%"></div></div></div>
+  <div class="bgnums">USD 2.2K / Sin objetivo</div>
+  <div class="bgpct" style="color:var(--tx3)">—</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Sin objetivo cargado</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="SOFI CAÑON" data-rid="objrow_colombia_23" onclick="toggleObjDetalle('objrow_colombia_23')" style="cursor:pointer">
+  <td style="font-weight:600">SOFI CAÑON</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 1.1K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 1.1K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">—</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 14.1K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 9.5K</span><span class="obj-vista" data-vista="artistico" style="display:none">USD 1.6K</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--red);">8%</span><span class="obj-vista" data-vista="comercial" style="color:var(--red);display:none">12%</span><span class="obj-vista" data-vista="artistico" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="internacional" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 12.9K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 8.3K</span><span class="obj-vista" data-vista="artistico" style="display:none">USD 1.6K</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_23" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:12%"></div></div></div>
+  <div class="bgnums">USD 1.1K / USD 9.5K</div>
+  <div class="bgpct" style="color:var(--red)">12%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 8.3K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Artístico</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 1.6K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 1.6K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 3.0K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 3.0K</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="VALERIA QUINTERO" data-rid="objrow_colombia_24" onclick="toggleObjDetalle('objrow_colombia_24')" style="cursor:pointer">
+  <td style="font-weight:600">VALERIA QUINTERO</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 800</span><span class="obj-vista" data-vista="comercial" style="display:none">—</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 800</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 13.9K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">Sin objetivo</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 1.3K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--red);">6%</span><span class="obj-vista" data-vista="comercial" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="artistico" style="color:var(--tx3);display:none">—</span><span class="obj-vista" data-vista="internacional" style="color:var(--yellow);display:none">63%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 13.1K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 12.6K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 472</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_24" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 12.6K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 12.6K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal warn" style="width:63%"></div></div></div>
+  <div class="bgnums">USD 800 / USD 1.3K</div>
+  <div class="bgpct" style="color:var(--yellow)">63%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 472</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="MARIANA SALAZAR" data-rid="objrow_colombia_25" onclick="toggleObjDetalle('objrow_colombia_25')" style="cursor:pointer">
+  <td style="font-weight:600">MARIANA SALAZAR</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 1.2K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 1.2K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">—</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 12.2K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 7.9K</span><span class="obj-vista" data-vista="artistico" style="display:none">Sin objetivo</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 4.3K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--red);">10%</span><span class="obj-vista" data-vista="comercial" style="color:var(--red);display:none">15%</span><span class="obj-vista" data-vista="artistico" style="color:var(--tx3);display:none">—</span><span class="obj-vista" data-vista="internacional" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 11.0K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 6.7K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 4.3K</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_25" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:15%"></div></div></div>
+  <div class="bgnums">USD 1.2K / USD 7.9K</div>
+  <div class="bgpct" style="color:var(--red)">15%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 6.7K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 4.3K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 4.3K</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="DANIELA ARISTIZABAL" data-rid="objrow_colombia_26" onclick="toggleObjDetalle('objrow_colombia_26')" style="cursor:pointer">
+  <td style="font-weight:600">DANIELA ARISTIZABAL</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 26.3K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 19.4K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 6.9K</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 11.9K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 7.9K</span><span class="obj-vista" data-vista="artistico" style="display:none">Sin objetivo</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 4.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--a5);">221%</span><span class="obj-vista" data-vista="comercial" style="color:var(--a5);display:none">246%</span><span class="obj-vista" data-vista="artistico" style="color:var(--tx3);display:none">—</span><span class="obj-vista" data-vista="internacional" style="color:var(--a5);display:none">172%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">✓ Cumplido</span><span class="obj-vista" data-vista="comercial" style="display:none">✓ Cumplido</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">✓ Cumplido</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_26" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal over" style="width:100%"></div></div></div>
+  <div class="bgnums">USD 19.4K / USD 7.9K</div>
+  <div class="bgpct" style="color:var(--a5)">246%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: ✓ Cumplido</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal over" style="width:100%"></div></div></div>
+  <div class="bgnums">USD 6.9K / USD 4.0K</div>
+  <div class="bgpct" style="color:var(--a5)">172%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: ✓ Cumplido</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="JULIAN FORERO" data-rid="objrow_colombia_27" onclick="toggleObjDetalle('objrow_colombia_27')" style="cursor:pointer">
+  <td style="font-weight:600">JULIAN FORERO</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 1.7K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 1.7K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">—</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 11.8K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 8.8K</span><span class="obj-vista" data-vista="artistico" style="display:none">Sin objetivo</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--red);">15%</span><span class="obj-vista" data-vista="comercial" style="color:var(--red);display:none">20%</span><span class="obj-vista" data-vista="artistico" style="color:var(--tx3);display:none">—</span><span class="obj-vista" data-vista="internacional" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 10.1K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 7.1K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_27" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:20%"></div></div></div>
+  <div class="bgnums">USD 1.7K / USD 8.8K</div>
+  <div class="bgpct" style="color:var(--red)">20%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 7.1K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 3.0K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 3.0K</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="KAM JURADO" data-rid="objrow_colombia_28" onclick="toggleObjDetalle('objrow_colombia_28')" style="cursor:pointer">
+  <td style="font-weight:600">KAM JURADO</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 3.6K</span><span class="obj-vista" data-vista="comercial" style="display:none">—</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 3.6K</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 11.5K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 7.9K</span><span class="obj-vista" data-vista="artistico" style="display:none">USD 1.6K</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 2.0K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--red);">32%</span><span class="obj-vista" data-vista="comercial" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="artistico" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="internacional" style="color:var(--a5);display:none">182%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 7.8K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 7.9K</span><span class="obj-vista" data-vista="artistico" style="display:none">USD 1.6K</span><span class="obj-vista" data-vista="internacional" style="display:none">✓ Cumplido</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_28" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 7.9K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 7.9K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Artístico</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 1.6K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 1.6K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal over" style="width:100%"></div></div></div>
+  <div class="bgnums">USD 3.6K / USD 2.0K</div>
+  <div class="bgpct" style="color:var(--a5)">182%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: ✓ Cumplido</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="CAMILO HENAO" data-rid="objrow_colombia_29" onclick="toggleObjDetalle('objrow_colombia_29')" style="cursor:pointer">
+  <td style="font-weight:600">CAMILO HENAO</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 1.1K</span><span class="obj-vista" data-vista="comercial" style="display:none">—</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">—</span><span class="obj-vista" data-vista="intercompany" style="display:none">USD 1.1K</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 9.6K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 7.9K</span><span class="obj-vista" data-vista="artistico" style="display:none">Sin objetivo</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 1.7K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--red);">12%</span><span class="obj-vista" data-vista="comercial" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="artistico" style="color:var(--tx3);display:none">—</span><span class="obj-vista" data-vista="internacional" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 8.4K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 7.9K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 1.7K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo cargado</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_29" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 7.9K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 7.9K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 1.7K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 1.7K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Intercompany</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal warn" style="width:100%"></div></div></div>
+  <div class="bgnums">USD 1.1K / Sin objetivo</div>
+  <div class="bgpct" style="color:var(--tx3)">—</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Sin objetivo cargado</div>
+</div></td>
+</tr><tr class="obj-row" data-nombre="TAYA NOVOA" data-rid="objrow_colombia_30" onclick="toggleObjDetalle('objrow_colombia_30')" style="cursor:pointer">
+  <td style="font-weight:600">TAYA NOVOA</td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">—</span><span class="obj-vista" data-vista="comercial" style="display:none">—</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">—</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 9.2K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 7.9K</span><span class="obj-vista" data-vista="artistico" style="display:none">Sin objetivo</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 1.3K</span><span class="obj-vista" data-vista="intercompany" style="display:none">Sin objetivo</span></td>
+  <td class="r" style="font-weight:700"><span class="obj-vista" data-vista="total" style="color:var(--red);">0%</span><span class="obj-vista" data-vista="comercial" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="artistico" style="color:var(--tx3);display:none">—</span><span class="obj-vista" data-vista="internacional" style="color:var(--red);display:none">0%</span><span class="obj-vista" data-vista="intercompany" style="color:var(--tx3);display:none">—</span></td>
+  <td class="r"><span class="obj-vista" data-vista="total" style="">USD 9.2K</span><span class="obj-vista" data-vista="comercial" style="display:none">USD 7.9K</span><span class="obj-vista" data-vista="artistico" style="display:none">—</span><span class="obj-vista" data-vista="internacional" style="display:none">USD 1.3K</span><span class="obj-vista" data-vista="intercompany" style="display:none">—</span></td>
+</tr>
+<tr class="obj-detalle" id="objrow_colombia_30" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)"><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Comercial</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 7.9K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 7.9K</div>
+</div><div class="bgrow">
+  <span class="bgtipo" style="width:100px">Internacional</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal low" style="width:0%"></div></div></div>
+  <div class="bgnums">— / USD 1.3K</div>
+  <div class="bgpct" style="color:var(--red)">0%</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: USD 1.3K</div>
+</div></td>
+</tr></tbody>
+</table></div>
+</div>
 </div>
 <script>
 function sw(pid,tab){
@@ -281,6 +998,33 @@ function sst(prefix,tab){
   if(trig)trig.classList.add('active');
   var sp=document.getElementById(prefix+'_'+tab);
   if(sp)sp.classList.add('active');
+}
+function filtrarTalentos(inputId){
+  var input=document.getElementById(inputId);
+  var tabla=document.getElementById(inputId+'_list');
+  if(!input||!tabla)return;
+  var q=input.value.trim().toUpperCase();
+  tabla.querySelectorAll('.obj-row').forEach(function(row){
+    var nombre=row.getAttribute('data-nombre')||'';
+    var visible = nombre.indexOf(q)!==-1;
+    row.style.display = visible ? '' : 'none';
+    var det=document.getElementById(row.getAttribute('data-rid'));
+    if(det && !visible) det.style.display='none';
+  });
+}
+function filtrarCategoria(inputId){
+  var sel=document.getElementById(inputId+'_cat');
+  var tabla=document.getElementById(inputId+'_list');
+  if(!sel||!tabla)return;
+  var vista=sel.value;
+  tabla.querySelectorAll('.obj-vista').forEach(function(sp){
+    sp.style.display = sp.getAttribute('data-vista')===vista ? '' : 'none';
+  });
+}
+function toggleObjDetalle(rid){
+  var det=document.getElementById(rid);
+  if(!det)return;
+  det.style.display = det.style.display==='none' ? '' : 'none';
 }</script>
 </body>
 </html>
