@@ -317,7 +317,7 @@ def pill_tipo(t):
 # ─── PRESUPUESTO ───────────────────────────────────────────────────────────────
 BUDGET_CFG = {
     "argentina": {"sheet":"BG ARG","local":7,"comercial":18,"artistico":27,"regional":34,"intl":42,"tc":None},
-    "chile":     {"sheet":"BG CHI","local":None,"comercial":16,"artistico":24,"regional":31,"intl":41,"tc":TC_PRESUP_CLP},
+    "chile":     {"sheet":"BG CHI","local":7,"comercial":17,"artistico":25,"regional":32,"intl":42,"tc":TC_PRESUP_CLP},
     "colombia":  {"sheet":"BG COL","local":7,"comercial":21,"artistico":30,"regional":37,"intl":46,"tc":None},
     "usa":       {"sheet":"BG USA","local":6,"comercial":17,"artistico":27,"regional":34,"intl":43,"tc":None},
     "peru":      {"sheet":None},
