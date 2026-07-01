@@ -257,12 +257,24 @@ def get_linea(t, lines):
     if isinstance(slid,list): slid=slid[0]
     return lines.get(slid) if slid else None
 
+# Órdenes con la moneda mal cargada en Odoo (currency_id incorrecto en el
+# sistema). Se fuerza la moneda real conocida en vez de confiar en Odoo para
+# estos casos puntuales. Agregar acá cualquier otro caso confirmado.
+ORDENES_MONEDA_INCORRECTA = {
+    "CL02396": "CLP",  # Icata, enero: cargada como USD en Odoo pero fue en CLP
+}
+
 def get_importe_usd(t, lines):
     linea = get_linea(t, lines)
     if linea:
         amt = linea.get("price_unit") or 0
-        cur = linea.get("currency_id")
-        cur_code = cur[1] if isinstance(cur,list) else "USD"
+        order = t.get("_order")
+        order_name = order.get("name") if order else None
+        if order_name in ORDENES_MONEDA_INCORRECTA:
+            cur_code = ORDENES_MONEDA_INCORRECTA[order_name]
+        else:
+            cur = linea.get("currency_id")
+            cur_code = cur[1] if isinstance(cur,list) else "USD"
         return to_usd(float(amt), cur_code)
     return 0.0
 
