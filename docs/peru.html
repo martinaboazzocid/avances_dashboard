@@ -100,7 +100,7 @@ tr:hover td{background:rgba(79,142,247,.04)}
   <div class="hdr-logo">ZAS</div><div class="hdr-sep">/</div>
   <div class="hdr-title">Dashboard de Implementaciones</div>
   <div class="hdr-badge">Campañas Peruanas</div>
-  <div class="hdr-date">01 Jul 2026 · 18:37 hs ARG</div>
+  <div class="hdr-date">01 Jul 2026 · 18:44 hs ARG</div>
 </div>
 <div id="pg_campanas_peru">
 <div class="mtabs">
@@ -243,6 +243,22 @@ function filtrarCategoria(inputId){
   var vista=sel.value;
   tabla.querySelectorAll('.obj-vista').forEach(function(sp){
     sp.style.display = sp.getAttribute('data-vista')===vista ? '' : 'none';
+  });
+  ordenarPorVista(inputId, vista);
+}
+function ordenarPorVista(inputId, vista){
+  var tabla=document.getElementById(inputId+'_list');
+  if(!tabla)return;
+  var tbody=tabla.tagName==='TBODY' ? tabla : tabla.querySelector('tbody');
+  if(!tbody)return;
+  var rows=Array.from(tbody.querySelectorAll('.obj-row'));
+  var pares=rows.map(function(row){
+    return {row:row, det:row.nextElementSibling, val:parseFloat(row.getAttribute('data-real-'+vista))||0};
+  });
+  pares.sort(function(a,b){ return b.val-a.val; });
+  pares.forEach(function(p){
+    tbody.appendChild(p.row);
+    if(p.det) tbody.appendChild(p.det);
   });
 }
 function toggleObjDetalle(rid){
