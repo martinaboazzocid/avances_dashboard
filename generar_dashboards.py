@@ -607,6 +607,10 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',system-ui,sans-ser
 .card-h-note{font-size:10px;color:var(--tx3);font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px}
 .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .card-b{padding:14px 16px}.note{font-size:11.5px;color:var(--tx3);padding:6px 0}
+.obj-card summary::-webkit-details-marker{display:none}
+.obj-card summary::marker{content:""}
+.obj-card summary:hover{background:rgba(255,255,255,.02)}
+.obj-card[open] summary{border-bottom:1px solid var(--bdr)}
 .tw{overflow-x:auto}
 table{width:100%;border-collapse:collapse}
 th{text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--tx3);padding:6px 9px;border-bottom:1px solid var(--bdr)}
@@ -679,13 +683,30 @@ function sst(prefix,tab){
 }
 function filtrarTalentos(inputId){
   var input=document.getElementById(inputId);
-  var lista=document.getElementById(inputId+'_list');
-  if(!input||!lista)return;
+  var tabla=document.getElementById(inputId+'_list');
+  if(!input||!tabla)return;
   var q=input.value.trim().toUpperCase();
-  lista.querySelectorAll('.obj-card').forEach(function(card){
-    var nombre=card.getAttribute('data-nombre')||'';
-    card.style.display = nombre.indexOf(q)!==-1 ? '' : 'none';
+  tabla.querySelectorAll('.obj-row').forEach(function(row){
+    var nombre=row.getAttribute('data-nombre')||'';
+    var visible = nombre.indexOf(q)!==-1;
+    row.style.display = visible ? '' : 'none';
+    var det=document.getElementById(row.getAttribute('data-rid'));
+    if(det && !visible) det.style.display='none';
   });
+}
+function filtrarCategoria(inputId){
+  var sel=document.getElementById(inputId+'_cat');
+  var tabla=document.getElementById(inputId+'_list');
+  if(!sel||!tabla)return;
+  var vista=sel.value;
+  tabla.querySelectorAll('.obj-vista').forEach(function(sp){
+    sp.style.display = sp.getAttribute('data-vista')===vista ? '' : 'none';
+  });
+}
+function toggleObjDetalle(rid){
+  var det=document.getElementById(rid);
+  if(!det)return;
+  det.style.display = det.style.display==='none' ? '' : 'none';
 }"""
 
 def mes_label(y,m):
@@ -842,82 +863,130 @@ def build_presupuesto(tasks, lines, budget_pais, mes, anio, tab):
     return html + "</div></div>"
 
 def build_objetivos_talentos(pais, anio, classified, lines, objetivos_pais):
-    """Arma la solapa 'Objetivos Talentos': una fila por talento con
-    acumulado real vs objetivo de Comercial, Artístico, Internacional e
-    Intercompany, más cuánto le falta para llegar a cada objetivo, más un
-    Total que suma las 4 categorías. Incluye un buscador para filtrar por
-    nombre de talento."""
+    """Arma la solapa 'Objetivos Talentos' como una única tabla: una fila por
+    talento con Real/Objetivo/%/Falta según la categoría elegida en el filtro
+    (Total por defecto). Al tocar el nombre se despliega una fila de detalle
+    con el desglose completo de Comercial/Artístico/Internacional/Intercompany.
+    Incluye buscador por nombre."""
     if not objetivos_pais:
         return '<p class="note">No hay objetivos de talentos cargados para este país.</p>'
 
     reales = compute_reales_talentos(pais, classified, lines)
 
     conceptos = [
+        ("total",         "Total"),
         ("comercial",     "Comercial"),
         ("artistico",     "Artístico"),
         ("internacional", "Internacional"),
         ("intercompany",  "Intercompany"),
     ]
 
-    def fila_bg(label, real, objetivo, bold=False, sin_obj=False):
-        style = "font-weight:700" if bold else ""
-        if sin_obj:
+    def celda_valores(real, objetivo):
+        """Devuelve (real_str, objetivo_str, pct_str, pct_color, falta_str) para una categoría."""
+        if not objetivo and not real:
+            return "—", "Sin objetivo", "—", "var(--tx3)", "—"
+        if not objetivo:
+            return fmt_usd(real), "Sin objetivo", "—", "var(--tx3)", "Sin objetivo cargado"
+        pct = real/objetivo
+        falta = max(objetivo - real, 0)
+        return fmt_usd(real), fmt_usd(objetivo), f"{pct:.0%}", pct_col(pct), (fmt_usd(falta) if falta else "✓ Cumplido")
+
+    def fila_bg_desglose(label, real, objetivo):
+        """Fila con barra de progreso para el desglose expandido."""
+        if not objetivo and not real:
+            return ""
+        if not objetivo:
             return f"""<div class="bgrow">
-  <span class="bgtipo" style="width:100px;{style}">{label}</span>
+  <span class="bgtipo" style="width:100px">{label}</span>
   <div style="flex:1"><div class="bgtrk"><div class="bgreal warn" style="width:100%"></div></div></div>
   <div class="bgnums">{fmt_usd(real)} / Sin objetivo</div>
   <div class="bgpct" style="color:var(--tx3)">—</div>
   <div class="bgnums" style="min-width:110px;color:var(--tx3)">Sin objetivo cargado</div>
 </div>"""
-        pct = real/objetivo if objetivo else 0
+        pct = real/objetivo
         falta = max(objetivo - real, 0)
         bw = min(pct*100, 100)
         return f"""<div class="bgrow">
-  <span class="bgtipo" style="width:100px;{style}">{label}</span>
+  <span class="bgtipo" style="width:100px">{label}</span>
   <div style="flex:1"><div class="bgtrk"><div class="bgreal {pct_cls(pct)}" style="width:{bw:.0f}%"></div></div></div>
   <div class="bgnums">{fmt_usd(real)} / {fmt_usd(objetivo)}</div>
   <div class="bgpct" style="color:{pct_col(pct)}">{pct:.0%}</div>
   <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: {fmt_usd(falta) if falta else "✓ Cumplido"}</div>
 </div>"""
 
-    filas_html = ""
-    for obj in sorted(objetivos_pais, key=lambda o: -sum(o[k] for k,_ in conceptos)):
+    filas_tabla = ""
+    row_id = 0
+    for obj in sorted(objetivos_pais, key=lambda o: -sum(o[k] for k,_ in conceptos[1:])):
         nombre = obj["nombre"]
         r = reales.get(obj["nombre_norm"], {"comercial":0.0,"artistico":0.0,"internacional":0.0,"intercompany":0.0})
 
-        bloques = ""
-        for key, label in conceptos:
-            objetivo = obj[key]
-            real = r[key]
-            if not objetivo and not real:
-                continue  # ni objetivo ni venta real: no aporta nada, se omite
-            bloques += fila_bg(label, real, objetivo, sin_obj=(not objetivo))
+        desglose = "".join(fila_bg_desglose(label, r[key], obj[key]) for key, label in conceptos[1:])
+        if not desglose:
+            continue  # talento sin ningún dato (ni objetivo ni real) en las 4 categorías
 
-        if not bloques:
-            continue
-
-        # Fila Total: suma de las 4 categorías (real acumulado vs objetivo acumulado)
         total_real = sum(r.values())
-        total_obj  = sum(obj[k] for k,_ in conceptos)
-        total_html = fila_bg("Total", total_real, total_obj, bold=True) if total_obj else ""
+        total_obj  = sum(obj[k] for k,_ in conceptos[1:])
 
+        # Una <td> por celda de valor, por cada vista posible; el JS oculta todas
+        # menos la que corresponde a la categoría elegida en el <select>
+        celdas_por_vista = {}
+        for key, _ in conceptos:
+            real, objetivo = (total_real, total_obj) if key == "total" else (r[key], obj[key])
+            celdas_por_vista[key] = celda_valores(real, objetivo)
+
+        def celda_vista(idx):
+            spans = "".join(
+                f'<span class="obj-vista" data-vista="{key}" style="{"" if key=="total" else "display:none"}">{celdas_por_vista[key][idx]}</span>'
+                for key,_ in conceptos
+            )
+            return spans
+
+        row_id += 1
+        rid = f"objrow_{pais}_{row_id}"
         nombre_attr = normalizar_nombre(nombre)
-        filas_html += f"""<div class="card obj-card" style="margin-bottom:14px" data-nombre="{nombre_attr}">
-  <div class="card-h"><div class="dot" style="background:var(--a1)"></div>{nombre}</div>
-  <div class="card-b">{total_html}{bloques}</div>
-</div>"""
 
-    if not filas_html:
+        # Color dinámico del % (solo se ve el de la vista activa, pero por simplicidad
+        # de markup mostramos el texto con el color correspondiente vía inline en cada span)
+        pct_spans = "".join(
+            f'<span class="obj-vista" data-vista="{key}" style="color:{celdas_por_vista[key][3]};{"" if key=="total" else "display:none"}">{celdas_por_vista[key][2]}</span>'
+            for key,_ in conceptos
+        )
+
+        filas_tabla += f"""<tr class="obj-row" data-nombre="{nombre_attr}" data-rid="{rid}" onclick="toggleObjDetalle('{rid}')" style="cursor:pointer">
+  <td style="font-weight:600">{nombre}</td>
+  <td class="r">{celda_vista(0)}</td>
+  <td class="r">{celda_vista(1)}</td>
+  <td class="r" style="font-weight:700">{pct_spans}</td>
+  <td class="r">{celda_vista(4)}</td>
+</tr>
+<tr class="obj-detalle" id="{rid}" style="display:none">
+  <td colspan="5" style="padding:14px 16px;background:var(--bg)">{desglose}</td>
+</tr>"""
+
+    if not filas_tabla:
         return '<p class="note">No hay objetivos de talentos con datos cargados.</p>'
 
     buscador_id = f"objbuscar_{pais}"
-    buscador = f"""<div style="margin-bottom:16px">
+    controles = f"""<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;align-items:center">
   <input type="text" id="{buscador_id}" placeholder="🔎 Buscar talento..." autocomplete="off"
     oninput="filtrarTalentos('{buscador_id}')"
-    style="width:100%;max-width:320px;padding:8px 12px;border-radius:8px;border:1px solid var(--bdr);background:var(--s1);color:var(--tx1);font-size:13px;font-family:inherit">
+    style="flex:1;min-width:200px;max-width:320px;padding:8px 12px;border-radius:8px;border:1px solid var(--bdr);background:var(--s1);color:var(--tx1);font-size:13px;font-family:inherit">
+  <select id="{buscador_id}_cat" onchange="filtrarCategoria('{buscador_id}')"
+    style="padding:8px 12px;border-radius:8px;border:1px solid var(--bdr);background:var(--s1);color:var(--tx1);font-size:13px;font-family:inherit">
+    <option value="total">Total</option>
+    <option value="comercial">Comercial</option>
+    <option value="artistico">Artístico</option>
+    <option value="internacional">Internacional</option>
+    <option value="intercompany">Intercompany</option>
+  </select>
 </div>"""
 
-    return f'<p class="sec-title">Objetivos {anio} por Talento — Acumulado Real vs Objetivo</p>{buscador}<div id="{buscador_id}_list">{filas_html}</div>'
+    tabla = f"""<div class="tw"><table id="{buscador_id}_list">
+<thead><tr><th>Talento</th><th class="r">Real</th><th class="r">Objetivo</th><th class="r">%</th><th class="r">Falta</th></tr></thead>
+<tbody>{filas_tabla}</tbody>
+</table></div>"""
+
+    return f'<p class="sec-title">Objetivos {anio} por Talento — Acumulado Real vs Objetivo</p>{controles}{tabla}'
 
 def build_pipeline(tasks, lines, mes, anio):
     today = date.today()
