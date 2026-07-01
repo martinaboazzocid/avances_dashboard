@@ -63,6 +63,7 @@ ORDER_FIELDS = [
 
 LINE_FIELDS = [
     "id","order_id","task_id","price_unit","currency_id","state",
+    "product_template_id",
 ]
 
 # ─── CLASIFICACIÓN ─────────────────────────────────────────────────────────────
@@ -239,10 +240,13 @@ def parse_date(s):
     try: return datetime.strptime(str(s)[:10], "%Y-%m-%d").date()
     except: return None
 
-def get_importe_usd(t, lines):
+def get_linea(t, lines):
     slid = t.get("sale_line_id")
     if isinstance(slid,list): slid=slid[0]
-    linea = lines.get(slid) if slid else None
+    return lines.get(slid) if slid else None
+
+def get_importe_usd(t, lines):
+    linea = get_linea(t, lines)
     if linea:
         amt = linea.get("price_unit") or 0
         cur = linea.get("currency_id")
@@ -256,12 +260,34 @@ def get_fecha_pub(t):
 def get_fecha_est(t):
     return parse_date(t.get("x_studio_fecha_limite_ops"))
 
-def parse_talento(name):
-    return name[:name.index("(")].strip() if "(" in name else name.strip()
+def parse_talento(name, linea=None):
+    # El nombre de la subtarea normalmente sigue el formato "Talento (Contenido)".
+    # Cuando no lo sigue (nombres atípicos como "1 Reel", "Tik Tok"), la fuente
+    # confiable es el producto vendido: en Odoo el producto ES el influencer y
+    # los tipos de contenido están configurados como variantes, por lo que
+    # product_template_id de la línea de venta trae el mismo formato
+    # "Talento (Contenido)" pero siempre correcto.
+    if "(" in name:
+        tal = name[:name.index("(")].strip()
+        if tal: return tal
+    if linea:
+        prod = linea.get("product_template_id")
+        prod_name = prod[1] if isinstance(prod,list) and len(prod)>1 else ""
+        if "(" in prod_name:
+            tal = prod_name[:prod_name.index("(")].strip()
+            if tal: return tal
+        elif prod_name:
+            return prod_name.strip()
+    return None
 
-def parse_contenido(name):
+def parse_contenido(name, linea=None):
     if "(" in name and ")" in name:
         return name[name.index("(")+1:name.rindex(")")].strip()
+    if linea:
+        prod = linea.get("product_template_id")
+        prod_name = prod[1] if isinstance(prod,list) and len(prod)>1 else ""
+        if "(" in prod_name and ")" in prod_name:
+            return prod_name[prod_name.index("(")+1:prod_name.rindex(")")].strip()
     return ""
 
 def pill_tipo(t):
@@ -349,7 +375,8 @@ def compute_kpis(tasks, lines, mes, anio):
             if fpub.year == anio and fpub.month == mes:
                 impl_mes += amt; cnt_mes += 1
                 if oid: campanas_mes.add(oid)
-                talentos_mes.add(parse_talento(t.get("name","")))
+                tal = parse_talento(t.get("name",""), get_linea(t, lines))
+                if tal: talentos_mes.add(tal)
             if fpub.year == anio and fpub.month <= mes:
                 impl_ytd += amt; cnt_ytd += 1
             if order and order.get("date_order"):
@@ -520,8 +547,9 @@ def build_implementado(tasks, lines, kpis, mes, anio):
         amt = get_importe_usd(t, lines)
         tipo, _ = pill_tipo(t)
         tipo_cnt[tipo]+=1; tipo_usd[tipo]+=amt
-        tal = parse_talento(t.get("name",""))
-        tal_cnt[tal]+=1; tal_usd[tal]+=amt
+        tal = parse_talento(t.get("name",""), get_linea(t, lines))
+        if tal:
+            tal_cnt[tal]+=1; tal_usd[tal]+=amt
         order = t.get("_order")
         cli = ""
         if order and order.get("partner_id"):
@@ -662,8 +690,9 @@ def build_pipeline(tasks, lines, mes, anio):
 
     def trow(t, show_dias=True):
         nombre = t.get("name","")
-        tal = parse_talento(nombre)
-        cont = parse_contenido(nombre)
+        linea = get_linea(t, lines)
+        tal = parse_talento(nombre, linea) or "—"
+        cont = parse_contenido(nombre, linea)
         order = t.get("_order")
         cli = ""
         if order and order.get("partner_id"):
@@ -713,7 +742,8 @@ def build_historial(tasks, lines, mes, anio):
     for t in tasks:
         fp = get_fecha_pub(t)
         if not fp: continue
-        tal = parse_talento(t.get("name",""))
+        tal = parse_talento(t.get("name",""), get_linea(t, lines))
+        if not tal: continue
         tal_cnt[tal]+=1; tal_usd[tal]+=get_importe_usd(t,lines)
     top_tal = sorted(tal_usd.items(),key=lambda x:-x[1])[:15]
     tal_rows = "".join(f'<tr><td>{n}</td><td class="r">{tal_cnt[n]}</td><td class="r">{fmt_usd(u)}</td></tr>' for n,u in top_tal)
@@ -737,7 +767,8 @@ def build_historial(tasks, lines, mes, anio):
     for t in tasks:
         fp = get_fecha_pub(t)
         if not fp or (fp.year,fp.month) not in ult6: continue
-        tal = parse_talento(t.get("name",""))
+        tal = parse_talento(t.get("name",""), get_linea(t, lines))
+        if not tal: continue
         key = (fp.year,fp.month)
         tal_mes[tal][key]["cnt"]+=1
         tal_mes[tal][key]["usd"]+=get_importe_usd(t,lines)
