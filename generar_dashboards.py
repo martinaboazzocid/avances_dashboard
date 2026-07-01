@@ -676,6 +676,16 @@ function sst(prefix,tab){
   if(trig)trig.classList.add('active');
   var sp=document.getElementById(prefix+'_'+tab);
   if(sp)sp.classList.add('active');
+}
+function filtrarTalentos(inputId){
+  var input=document.getElementById(inputId);
+  var lista=document.getElementById(inputId+'_list');
+  if(!input||!lista)return;
+  var q=input.value.trim().toUpperCase();
+  lista.querySelectorAll('.obj-card').forEach(function(card){
+    var nombre=card.getAttribute('data-nombre')||'';
+    card.style.display = nombre.indexOf(q)!==-1 ? '' : 'none';
+  });
 }"""
 
 def mes_label(y,m):
@@ -834,7 +844,9 @@ def build_presupuesto(tasks, lines, budget_pais, mes, anio, tab):
 def build_objetivos_talentos(pais, anio, classified, lines, objetivos_pais):
     """Arma la solapa 'Objetivos Talentos': una fila por talento con
     acumulado real vs objetivo de Comercial, Artístico, Internacional e
-    Intercompany, más cuánto le falta para llegar a cada objetivo."""
+    Intercompany, más cuánto le falta para llegar a cada objetivo, más un
+    Total que suma las 4 categorías. Incluye un buscador para filtrar por
+    nombre de talento."""
     if not objetivos_pais:
         return '<p class="note">No hay objetivos de talentos cargados para este país.</p>'
 
@@ -847,6 +859,27 @@ def build_objetivos_talentos(pais, anio, classified, lines, objetivos_pais):
         ("intercompany",  "Intercompany"),
     ]
 
+    def fila_bg(label, real, objetivo, bold=False, sin_obj=False):
+        style = "font-weight:700" if bold else ""
+        if sin_obj:
+            return f"""<div class="bgrow">
+  <span class="bgtipo" style="width:100px;{style}">{label}</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal warn" style="width:100%"></div></div></div>
+  <div class="bgnums">{fmt_usd(real)} / Sin objetivo</div>
+  <div class="bgpct" style="color:var(--tx3)">—</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Sin objetivo cargado</div>
+</div>"""
+        pct = real/objetivo if objetivo else 0
+        falta = max(objetivo - real, 0)
+        bw = min(pct*100, 100)
+        return f"""<div class="bgrow">
+  <span class="bgtipo" style="width:100px;{style}">{label}</span>
+  <div style="flex:1"><div class="bgtrk"><div class="bgreal {pct_cls(pct)}" style="width:{bw:.0f}%"></div></div></div>
+  <div class="bgnums">{fmt_usd(real)} / {fmt_usd(objetivo)}</div>
+  <div class="bgpct" style="color:{pct_col(pct)}">{pct:.0%}</div>
+  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: {fmt_usd(falta) if falta else "✓ Cumplido"}</div>
+</div>"""
+
     filas_html = ""
     for obj in sorted(objetivos_pais, key=lambda o: -sum(o[k] for k,_ in conceptos)):
         nombre = obj["nombre"]
@@ -857,41 +890,34 @@ def build_objetivos_talentos(pais, anio, classified, lines, objetivos_pais):
             objetivo = obj[key]
             real = r[key]
             if not objetivo and not real:
-                # Ni objetivo ni venta real: no aporta nada, se omite
-                continue
-            if not objetivo:
-                # Hay venta real pero no hay objetivo cargado para este concepto
-                bloques += f"""<div class="bgrow">
-  <span class="bgtipo" style="width:100px">{label}</span>
-  <div style="flex:1"><div class="bgtrk"><div class="bgreal warn" style="width:100%"></div></div></div>
-  <div class="bgnums">{fmt_usd(real)} / Sin objetivo</div>
-  <div class="bgpct" style="color:var(--tx3)">—</div>
-  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Sin objetivo cargado</div>
-</div>"""
-                continue
-            pct = real/objetivo if objetivo else 0
-            falta = max(objetivo - real, 0)
-            bw = min(pct*100, 100)
-            bloques += f"""<div class="bgrow">
-  <span class="bgtipo" style="width:100px">{label}</span>
-  <div style="flex:1"><div class="bgtrk"><div class="bgreal {pct_cls(pct)}" style="width:{bw:.0f}%"></div></div></div>
-  <div class="bgnums">{fmt_usd(real)} / {fmt_usd(objetivo)}</div>
-  <div class="bgpct" style="color:{pct_col(pct)}">{pct:.0%}</div>
-  <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: {fmt_usd(falta) if falta else "✓ Cumplido"}</div>
-</div>"""
+                continue  # ni objetivo ni venta real: no aporta nada, se omite
+            bloques += fila_bg(label, real, objetivo, sin_obj=(not objetivo))
 
         if not bloques:
             continue
 
-        filas_html += f"""<div class="card" style="margin-bottom:14px">
+        # Fila Total: suma de las 4 categorías (real acumulado vs objetivo acumulado)
+        total_real = sum(r.values())
+        total_obj  = sum(obj[k] for k,_ in conceptos)
+        total_html = fila_bg("Total", total_real, total_obj, bold=True) if total_obj else ""
+
+        nombre_attr = normalizar_nombre(nombre)
+        filas_html += f"""<div class="card obj-card" style="margin-bottom:14px" data-nombre="{nombre_attr}">
   <div class="card-h"><div class="dot" style="background:var(--a1)"></div>{nombre}</div>
-  <div class="card-b">{bloques}</div>
+  <div class="card-b">{total_html}{bloques}</div>
 </div>"""
 
     if not filas_html:
         return '<p class="note">No hay objetivos de talentos con datos cargados.</p>'
 
-    return f'<p class="sec-title">Objetivos {anio} por Talento — Acumulado Real vs Objetivo</p>{filas_html}'
+    buscador_id = f"objbuscar_{pais}"
+    buscador = f"""<div style="margin-bottom:16px">
+  <input type="text" id="{buscador_id}" placeholder="🔎 Buscar talento..." autocomplete="off"
+    oninput="filtrarTalentos('{buscador_id}')"
+    style="width:100%;max-width:320px;padding:8px 12px;border-radius:8px;border:1px solid var(--bdr);background:var(--s1);color:var(--tx1);font-size:13px;font-family:inherit">
+</div>"""
+
+    return f'<p class="sec-title">Objetivos {anio} por Talento — Acumulado Real vs Objetivo</p>{buscador}<div id="{buscador_id}_list">{filas_html}</div>'
 
 def build_pipeline(tasks, lines, mes, anio):
     today = date.today()
