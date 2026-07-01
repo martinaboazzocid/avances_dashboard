@@ -357,18 +357,26 @@ def load_budget():
 
 # ─── OBJETIVOS TALENTOS ─────────────────────────────────────────────────────────
 # Código de país (columna B de la planilla) -> nombre interno usado en el dashboard
+# (solo estos 4 tienen solapa propia en el HTML)
 PAIS_CODE_MAP = {"AR":"argentina","CL":"chile","CO":"colombia","USA":"usa"}
 
 # Columnas COMERCIAL/ARTISTICO por país en la planilla de objetivos (0-indexed),
-# más el TC a aplicar (None = ya está en USD)
-OBJ_COLS_PAIS = {
-    "argentina": {"comercial":8,  "artistico":9,  "tc":None},
+# más el TC a aplicar (None = ya está en USD). Incluye TODOS los países del rango
+# A-P (incluso MEX y PER, que no tienen solapa propia) porque participan en el
+# cálculo de Intercompany de los demás.
+OBJ_COLS_TODOS_PAISES = {
+    # México: hoy no hay talentos con Comercial/Artístico cargado, así que no se
+    # pudo confirmar si viene en millones de MXN (como Chile) o en unidades.
+    # Se deja SIN escalar (tc=None) para evitar inflar por error si algún día
+    # se carga un valor real — confirmar con Martina antes de cambiar esto.
+    "mexico":    {"comercial":2,  "artistico":3,  "tc":None},
     "chile":     {"comercial":4,  "artistico":5,  "tc":TC_PRESUP_CLP},
-    "colombia":  {"comercial":12, "artistico":13, "tc":None},
+    "peru":      {"comercial":6,  "artistico":7,  "tc":None},
+    "argentina": {"comercial":8,  "artistico":9,  "tc":None},
     "usa":       {"comercial":10, "artistico":11, "tc":None},
+    "colombia":  {"comercial":12, "artistico":13, "tc":None},
 }
-OBJ_COL_INTL = 14        # columna O — Internacional, USD, aplica a todos los talentos
-OBJ_COLS_INTERCOMPANY = [17,18,19,20,21]  # columnas R,S,T,U,V — Venta Regional por país + resto del mundo
+OBJ_COL_INTL = 14  # columna O — Internacional, USD, aplica a todos los talentos
 
 def resolver_pais_talento(raw):
     """Resuelve el código de país crudo de la planilla de objetivos a AR/CL/CO/USA/etc.
@@ -399,10 +407,26 @@ def normalizar_nombre(n):
     (en MAYÚSCULAS) con los nombres reales de Odoo (capitalización normal)."""
     return " ".join((n or "").strip().upper().split())
 
+def _valor_pais_usd(row, cfg):
+    """Lee Comercial+Artístico de un país en la fila y los devuelve en USD."""
+    comercial = _num(row[cfg["comercial"]]) if cfg["comercial"] < len(row) else 0.0
+    artistico = _num(row[cfg["artistico"]]) if cfg["artistico"] < len(row) else 0.0
+    if cfg["tc"]:
+        # Chile/México vienen en millones de moneda local
+        comercial = comercial * 1_000_000 / cfg["tc"]
+        artistico = artistico * 1_000_000 / cfg["tc"]
+    return comercial, artistico
+
 def load_objetivos_talentos():
-    """Lee la planilla de objetivos por talento y devuelve, por país interno
-    (argentina/chile/colombia/usa), la lista de talentos con sus 4 objetivos en USD:
-    comercial_local, artistico_local, internacional, intercompany."""
+    """Lee la planilla de objetivos por talento (columnas A-P únicamente) y
+    devuelve, por país interno (argentina/chile/colombia/usa), la lista de
+    talentos con sus 4 objetivos en USD:
+    - comercial: columna Comercial de su propio país
+    - artistico: columna Artístico de su propio país
+    - internacional: columna O, aplica a todos
+    - intercompany: suma de Comercial+Artístico de TODOS LOS OTROS países
+      (incluye México y Perú aunque no tengan solapa propia)
+    """
     resultado = {p: [] for p in PAIS_CODE_MAP.values()}
     if not os.path.exists(OBJETIVOS_FILE):
         print(f"  ⚠ Archivo de objetivos no encontrado: {OBJETIVOS_FILE}")
@@ -421,18 +445,18 @@ def load_objetivos_talentos():
         pais_code = resolver_pais_talento(pais_raw)
         pais = PAIS_CODE_MAP.get(pais_code)
         if not pais:
-            continue  # país no soportado en la nueva solapa (MX, PE, NUEVO sin país, etc.)
+            continue  # país no soportado en la nueva solapa (NUEVO sin país, etc.)
 
-        cfg = OBJ_COLS_PAIS[pais]
-        comercial = _num(row[cfg["comercial"]]) if cfg["comercial"] < len(row) else 0.0
-        artistico = _num(row[cfg["artistico"]]) if cfg["artistico"] < len(row) else 0.0
-        if cfg["tc"]:
-            # Comercial/Artístico de Chile vienen en millones de CLP
-            comercial = comercial * 1_000_000 / cfg["tc"]
-            artistico = artistico * 1_000_000 / cfg["tc"]
+        comercial, artistico = _valor_pais_usd(row, OBJ_COLS_TODOS_PAISES[pais])
 
         internacional = _num(row[OBJ_COL_INTL]) if OBJ_COL_INTL < len(row) else 0.0
-        intercompany = sum(_num(row[c]) for c in OBJ_COLS_INTERCOMPANY if c < len(row))
+
+        intercompany = 0.0
+        for otro_pais, cfg in OBJ_COLS_TODOS_PAISES.items():
+            if otro_pais == pais:
+                continue
+            c, a = _valor_pais_usd(row, cfg)
+            intercompany += c + a
 
         resultado[pais].append({
             "nombre": nombre,
