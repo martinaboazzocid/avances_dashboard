@@ -702,6 +702,22 @@ function filtrarCategoria(inputId){
   tabla.querySelectorAll('.obj-vista').forEach(function(sp){
     sp.style.display = sp.getAttribute('data-vista')===vista ? '' : 'none';
   });
+  ordenarPorVista(inputId, vista);
+}
+function ordenarPorVista(inputId, vista){
+  var tabla=document.getElementById(inputId+'_list');
+  if(!tabla)return;
+  var tbody=tabla.tagName==='TBODY' ? tabla : tabla.querySelector('tbody');
+  if(!tbody)return;
+  var rows=Array.from(tbody.querySelectorAll('.obj-row'));
+  var pares=rows.map(function(row){
+    return {row:row, det:row.nextElementSibling, val:parseFloat(row.getAttribute('data-real-'+vista))||0};
+  });
+  pares.sort(function(a,b){ return b.val-a.val; });
+  pares.forEach(function(p){
+    tbody.appendChild(p.row);
+    if(p.det) tbody.appendChild(p.det);
+  });
 }
 function toggleObjDetalle(rid){
   var det=document.getElementById(rid);
@@ -914,9 +930,13 @@ def build_objetivos_talentos(pais, anio, classified, lines, objetivos_pais):
   <div class="bgnums" style="min-width:110px;color:var(--tx3)">Falta: {fmt_usd(falta) if falta else "✓ Cumplido"}</div>
 </div>"""
 
+    def total_real_de(obj):
+        r = reales.get(obj["nombre_norm"], {"comercial":0.0,"artistico":0.0,"internacional":0.0,"intercompany":0.0})
+        return sum(r.values())
+
     filas_tabla = ""
     row_id = 0
-    for obj in sorted(objetivos_pais, key=lambda o: -sum(o[k] for k,_ in conceptos[1:])):
+    for obj in sorted(objetivos_pais, key=lambda o: -total_real_de(o)):
         nombre = obj["nombre"]
         r = reales.get(obj["nombre_norm"], {"comercial":0.0,"artistico":0.0,"internacional":0.0,"intercompany":0.0})
 
@@ -945,6 +965,13 @@ def build_objetivos_talentos(pais, anio, classified, lines, objetivos_pais):
         rid = f"objrow_{pais}_{row_id}"
         nombre_attr = normalizar_nombre(nombre)
 
+        # Valor real crudo por vista, usado por el JS para reordenar la tabla
+        # de mayor a menor según la categoría elegida en el <select>
+        reales_attrs = " ".join(
+            f'data-real-{key}="{(total_real if key=="total" else r[key]):.2f}"'
+            for key,_ in conceptos
+        )
+
         # Color dinámico del % (solo se ve el de la vista activa, pero por simplicidad
         # de markup mostramos el texto con el color correspondiente vía inline en cada span)
         pct_spans = "".join(
@@ -952,7 +979,7 @@ def build_objetivos_talentos(pais, anio, classified, lines, objetivos_pais):
             for key,_ in conceptos
         )
 
-        filas_tabla += f"""<tr class="obj-row" data-nombre="{nombre_attr}" data-rid="{rid}" onclick="toggleObjDetalle('{rid}')" style="cursor:pointer">
+        filas_tabla += f"""<tr class="obj-row" data-nombre="{nombre_attr}" data-rid="{rid}" {reales_attrs} onclick="toggleObjDetalle('{rid}')" style="cursor:pointer">
   <td style="font-weight:600">{nombre}</td>
   <td class="r">{celda_vista(0)}</td>
   <td class="r">{celda_vista(1)}</td>
